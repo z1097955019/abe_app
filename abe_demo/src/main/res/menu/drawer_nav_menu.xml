@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/menu_home_arrange"
+            android:icon="@drawable/selector_bg_home"
+            android:title="演示模式" />
+        <item
+            android:id="@+id/menu_home_keygen"
+            android:icon="@drawable/selector_bg_give_key"
+            android:title="模拟实际使用" />
+
+    </group>
+</menu>

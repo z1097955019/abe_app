@@ -1,0 +1,47 @@
+<resources>
+    <string name="app_name">ABE_demo</string>
+    <string name="run">Run</string>
+    <string name="jump">进入演示模式</string>
+    <string name="mesMing">明文信息：</string>
+    <string name="mesMi">解密信息：</string>
+    <string name="ct">密文信息：</string>
+    <string name="QRCode">生成二维码：</string>
+    <string name="arrange">部署参数</string>
+    <string name="keygen">分发密钥</string>
+    <string name="encrypt">加密明文</string>
+    <string name="decrypt">解密密文</string>
+    <string name="drawer_open">open</string>
+    <string name="drawer_close">close</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="introduce_for_setup">在sepup算法运行的阶段，服务器生成了运算参数（包括公钥pk，主密钥msk）</string>
+    <string name="btn_run_setup">运行setup算法</string>
+    <string name="pk">公钥：</string>
+    <string name="msk">主密钥：</string>
+    <string name="setup_need">setup算法所需参数：</string>
+    <string name="nothing">无</string>
+    <string name="setup_given">setup算法生成的参数：</string>
+    <string name="waiting_init">（待生成）</string>
+    <string name="introduce_for_keygen">为了给用户生成唯一的密钥，密钥生成算法根据服务器存有的额公共参数进行运算，并生成用户密钥。</string>
+    <string name="btn_run_keygen">运行keygrn算法</string>
+    <string name="keygen_need">keygen算法需要的参数</string>
+    <string name="keygen_given">keygen算法生成的参数</string>
+    <string name="sk">用户密钥</string>
+    <string name="keygen_needed_pk">公钥 pk：</string>
+    <string name="keygen_needed_msk">主密钥 msk：</string>
+    <string name="introduce_for_encrypt">介绍一下encrypt算法</string>
+    <string name="btn_run_encrypt">运行encrypt算法</string>
+    <string name="encrypt_need">encrypt算法需要的参数</string>
+    <string name="encrypt_given">encrypt算法生成的参数</string>
+    <string name="encrypt_needed_pk">公钥 pk：</string>
+    <string name="encrypt_needed_access_tree">访问树结构：</string>
+    <string name="see_access_tree_in_bottom_right">点击平面右下角对应按钮跳转</string>
+    <string name="introduce_for_decrypt">描述一下decrypt算法</string>
+    <string name="btn_run_decrypt">decrypt</string>
+    <string name="decrypt_need">decrypt算法所需的参数</string>
+    <string name="decrypt_given">decrypt算法生成的参数</string>
+    <string name="decrypt_needed_pk">公钥 pk：</string>
+    <string name="decrypt_needed_ct">密文 ct：</string>
+    <string name="decrypt_needed_sk">私钥 sk：</string>
+    <string name="abe_demo">ABE_demo</string>
+</resources>

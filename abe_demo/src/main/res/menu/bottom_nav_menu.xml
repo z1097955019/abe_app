@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/menu_arrange"
+        android:icon="@drawable/selector_bg_home"
+        android:title="@string/arrange" />
+    <item
+        android:id="@+id/menu_keygen"
+        android:icon="@drawable/selector_bg_give_key"
+        android:title="@string/keygen" />
+    <item
+        android:id="@+id/menu_encrypt"
+        android:icon="@drawable/selector_bg_lock"
+        android:title="@string/encrypt" />
+    <item
+        android:id="@+id/menu_decrypt"
+        android:icon="@drawable/selector_bg_key"
+        android:title="@string/decrypt" />
+
+
+</menu>
