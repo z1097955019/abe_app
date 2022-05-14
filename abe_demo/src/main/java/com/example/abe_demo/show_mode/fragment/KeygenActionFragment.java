@@ -117,93 +117,80 @@ public class KeygenActionFragment extends Fragment {
         });
     }
 
-    private void writeFile(Properties prop, String FileName) {
-        try {
-            FileOutputStream fos = requireActivity().openFileOutput(FileName, Context.MODE_PRIVATE);
-            prop.store(fos, null);
-//            Toast.makeText(this, FileName + "保存成功", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-//            Toast.makeText(this, FileName+"保存失败", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    private Properties readFile(String FileName, boolean needProp) {
-        try {
-            Properties prop = new Properties();
-            FileInputStream fis = requireActivity().openFileInput(FileName);
-            prop.load(fis);
-//            Toast.makeText(this, FileName + "读取成功", Toast.LENGTH_SHORT).show();
-            return prop;
-        } catch (IOException e) {
-            e.printStackTrace();
-//            Toast.makeText(this, FileName + "读取失败", Toast.LENGTH_SHORT).show();
-            return new Properties();
-        }
-    }
-
     private void keygen(){
         // 生成椭圆曲线群
-        InputStream raw = getResources().openRawResource(R.raw.a);
-        PropertiesParameters curveParams = new PropertiesParameters();
-        curveParams.load(raw);
-        Pairing bp = PairingFactory.getPairing(curveParams);
+        Pairing bp =initBp() ;
 
         // 文件存储路径
         String pkFileName = "pk.properties";
         String mskFileName = "msk.properties";
         String skFileName = "sk.properties";
 
-        // 获取安卓内部存储
-        SharedPreferences showPkSP = requireActivity().getSharedPreferences("show_" + pkFileName, Context.MODE_PRIVATE);
-        SharedPreferences showMskSP = requireActivity().getSharedPreferences("show_" + mskFileName, Context.MODE_PRIVATE);
+        // 获取用户相关信息
         SharedPreferences personal_mes = requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE);
 
         // 用户拥有的属性表
         String[] userAttList = {personal_mes.getString("nameAndPhoneAndId", "")};
-        Snackbar.make(getView(),userAttList[0],Snackbar.LENGTH_SHORT).show();
 
-        Properties pkProp =new Properties() ;
-        Properties mskProp =new Properties();
+        // 初始化pk, msk
+        Properties pkProp = getData("show_" + pkFileName);
+        Properties mskProp = getData("show_" + mskFileName);
 
-        for(String key :showPkSP.getAll().keySet()){
-            if(!showPkSP.getString(key, "").equals("")){
-                pkProp.put(key, showPkSP.getString(key, ""));
-            }
-        }
-
-        for(String key :showMskSP.getAll().keySet()){
-            if(showMskSP.getAll().get(key) != null){
-                mskProp.put(key, showMskSP.getString(key, ""));
-            }
-        }
-
-
-//        Properties pkProp =  readFile(pkFileName, true);
-//        Properties mskProp =  readFile(mskFileName, true);
         tv_show_keygen_needed_pk.setText(pkProp.toString());
         tv_show_keygen_needed_msk.setText(mskProp.toString());
 
-        Properties sk = null;
-        try {
+        // 根据用户属性生成sk
+        Properties sk = new Properties();
+        try{
             sk = CP_ABE.keygen(bp, userAttList, pkProp, mskProp);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
 
-        if( sk!=null){
-            SharedPreferences abe_show = requireActivity().getSharedPreferences("show_"+skFileName, Context.MODE_PRIVATE);
-            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-            for (String property_key : sk.stringPropertyNames()){
-                editor.putString(property_key, sk.getProperty(property_key));
-            }
-            editor.apply();
-        }
-        writeFile(Objects.requireNonNull(sk), "show_"+skFileName);
-
+        // 展示
         tv_show_keygen_sk.setText(sk.toString());
 
-        Log.v("log", "生成密钥成功！");
-        Toast.makeText(getActivity(), "生成密钥成功！", Toast.LENGTH_SHORT).show();
+        // 存入sp
+        if(recordData(sk, "show_"+skFileName)){
+            Toast.makeText(getActivity(), "生成密钥成功！", Toast.LENGTH_SHORT).show();
+        }else {
+            Toast.makeText(getActivity(), "生成密钥失败！", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private Properties getData(String SPName) {
+        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+        Properties prop =new Properties() ;
+        for(String key :SP.getAll().keySet()){
+            if(!SP.getString(key, "").equals("")){
+                prop.put(key, SP.getString(key, ""));
+            }
+        }
+        return prop;
+    }
+
+    private boolean recordData(Properties temPro, String SPName) {
+        try {
+            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+            for (String property_key : temPro.stringPropertyNames()){
+                editor.putString(property_key, temPro.getProperty(property_key));
+            }
+            editor.apply();
+            return true;
+        }catch(Exception e){
+            return false;
+        }
+    }
+
+
+
+    private Pairing initBp() {
+        // 生成椭圆曲线群
+        InputStream raw = getResources().openRawResource(R.raw.a);
+        PropertiesParameters curveParams = new PropertiesParameters();
+        curveParams.load(raw);
+//        Log.v("log004: curveParams: ", curveParams.toString());
+        return PairingFactory.getPairing(curveParams);
     }
 }

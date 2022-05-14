@@ -1,5 +1,6 @@
 package com.example.abe_demo.show_mode.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -141,25 +142,14 @@ public class DecryptActionFragment extends Fragment {
     }
 
     private void decrypt(){
-
         // 生成椭圆曲线群
-        InputStream raw = getResources().openRawResource(R.raw.a);
-        PropertiesParameters curveParams = new PropertiesParameters();
-        curveParams.load(raw);
-        Log.v("log004: curveParams: ", curveParams.toString());
-        Pairing bp = PairingFactory.getPairing(curveParams);
+        Pairing bp = initBp();
 
         // 文件存储路径
-        String pkFileName = "pk.properties";
-        String mskFileName = "msk.properties";
         String skFileName = "sk.properties";
         String ctFileName1 = "ct1.properties";
         String ctFileName2 = "ct2.properties";
 
-
-        // 明文消息
-        String mes = "\tat it.unisa.dia.gas.plaf.jpbc.field.curve.ImmutableCurveElement)";
-        System.out.println("明文:" + mes);
 
         Map<Integer, String> structMes = new HashMap<>();
         structMes.put(1, "test1");
@@ -167,7 +157,6 @@ public class DecryptActionFragment extends Fragment {
         structMes.put(3, "test3");
 
         // 用户拥有的属性表
-//        String[] userAttList = {"Hedgehog", "zshw@outlook.com", "13204163804"};
         String[] userAttList = {"name123id"};
 
         Node[] nodes = new Node[7];
@@ -179,71 +168,59 @@ public class DecryptActionFragment extends Fragment {
         nodes[5] = new Node(5, "InvitorId");
         nodes[6] = new Node(6, "name123id");
 
-
-
         AccessTree accessTree = new AccessTree(nodes, bp);
-//!!!!!!!!!!!!!!!
-//        Properties ct1Prop =  readFile("show_"+ctFileName1, true);
-//        Properties ct2Prop =  readFile("show_"+ctFileName2, true);
-//        Properties skProp =  readFile("show_"+skFileName, true);
 
-        Properties ct1Prop =  new Properties();
-        Properties ct2Prop = new Properties();
-        Properties skProp =  new Properties();
+        Properties ct1Prop =  getData("show_"+ctFileName1);
+        Properties ct2Prop =  getData("show_"+ctFileName2);
+        Properties skProp =   getData("show_"+skFileName);
 
-        // 获取安卓内部存储
-        SharedPreferences showCt1SP = requireActivity().getSharedPreferences("show_"+ctFileName1, Context.MODE_PRIVATE);
-        SharedPreferences showCt2SP = requireActivity().getSharedPreferences("show_"+ctFileName2, Context.MODE_PRIVATE);
-        SharedPreferences showSkSP = requireActivity().getSharedPreferences("show_"+skFileName, Context.MODE_PRIVATE);
-
-        for(String key :showCt1SP.getAll().keySet()){
-            if(!showCt1SP.getString(key, "").equals("")){
-                ct1Prop.put(key, showCt1SP.getString(key, ""));
-            }
-        }
-        for(String key :showCt2SP.getAll().keySet()){
-            if(!showCt2SP.getString(key, "").equals("")){
-                ct2Prop.put(key, showCt2SP.getString(key, ""));
-            }
-        }
-        for(String key :showSkSP.getAll().keySet()){
-            if(!showSkSP.getString(key, "").equals("")){
-                skProp.put(key, showSkSP.getString(key, ""));
-            }
-        }
-//        Properties ct1Prop =  readFile(ctFileName1, true);
-//        Properties ct2Prop =  readFile(ctFileName2, true);
-//        Properties skProp =  readFile(skFileName, true);
-
+        // 展示用户密钥
         tv_show_decrypt_needed_sk.setText(skProp.toString());
+
+        // 展示密文
         StringBuilder sb = new StringBuilder();
         sb.append("密文组件ct1:\n").append(ct1Prop.toString()).append("\n\n").append("密文组件ct2:\n").append(ct2Prop);
         tv_show_decrypt_needed_ct.setText(sb);
 
+        // 存储解密信息
         List<String> messageBigNumStringGroup = new LinkedList<>();
 
-//         解密部分
-        System.out.println("login_skProp"+skProp);
-        System.out.println("login_ct1Prop"+ct1Prop);
-        System.out.println("login_ct2Prop"+ct2Prop);
+        // 解密部分
         List<Element> res = CP_ABE.Decrypt(bp, accessTree, ct1Prop, ct2Prop, skProp, true);
-        System.out.println("res："+res);
+
+        // 转译展示解密的明文
         if (!(res == null)) {
             for (Element bigNum : res) {
-//            messageBigNumStringGroup.add(bigNum.toString());
                 messageBigNumStringGroup.add(bigNum.toString().substring(1, bigNum.toString().length() - 1).split(",")[0].substring(2));
             }
-//        utils.util.BigNumGroupToMes()
             String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
-            Log.v("log", messageBigNumStringGroup.toString());
-            Log.v("log", "解密信息:" + resString);
 
+            // 展示
             tv_show_decrypt_ming.setText(resString);
+//            if (mes.equals(resString)) {
+//                Toast.makeText(getActivity(), "解密成功",Toast.LENGTH_SHORT).show();
+//            }
+        }
+    }
 
-            if (mes.equals(resString)) {
-                Toast.makeText(getActivity(), "解密成功",Toast.LENGTH_SHORT).show();
+    private Properties getData(String SPName) {
+        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+        Properties prop =new Properties() ;
+        for(String key :SP.getAll().keySet()){
+            if(!SP.getString(key, "").equals("")){
+                prop.put(key, SP.getString(key, ""));
             }
         }
+        return prop;
+    }
 
+
+    private Pairing initBp() {
+        // 生成椭圆曲线群
+        InputStream raw = getResources().openRawResource(R.raw.a);
+        PropertiesParameters curveParams = new PropertiesParameters();
+        curveParams.load(raw);
+//        Log.v("log004: curveParams: ", curveParams.toString());
+        return PairingFactory.getPairing(curveParams);
     }
 }

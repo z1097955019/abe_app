@@ -17,25 +17,20 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.abe_demo.R;
-import com.example.abe_demo.abe_tools.AccessTree;
 import com.example.abe_demo.abe_tools.CP_ABE;
-import com.example.abe_demo.abe_tools.Node;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
 
 import it.unisa.dia.gas.jpbc.Pairing;
-import it.unisa.dia.gas.jpbc.PairingParameters;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
-import it.unisa.dia.gas.plaf.jpbc.pairing.a.TypeACurveGenerator;
 import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
 
 /**
@@ -110,98 +105,53 @@ public class SetupActionFragment extends Fragment {
         });
     }
 
-
-    private void writeFile(Properties prop, String FileName) {
-        try {
-            FileOutputStream fos = requireActivity().openFileOutput(FileName, Context.MODE_PRIVATE);
-//            System.out.println("prop"+prop);
-            prop.store(fos, null);
-//            Toast.makeText(getActivity(), FileName + "保存成功", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-//            Toast.makeText(getActivity(), FileName+"保存失败", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    private Properties readFile(String FileName, boolean needProp) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try {
-            Properties prop = new Properties();
-            FileInputStream fis = requireActivity().openFileInput(FileName);
-            prop.load(fis);
-//            Toast.makeText(this, FileName + "读取成功", Toast.LENGTH_SHORT).show();
-            return prop;
-        } catch (IOException e) {
-            e.printStackTrace();
-//            Toast.makeText(this, FileName + "读取失败", Toast.LENGTH_SHORT).show();
-            return new Properties();
-        }
-    }
-
     private void setup() {
-
         // 生成椭圆曲线群
-        InputStream raw = getResources().openRawResource(R.raw.a);
-        PropertiesParameters curveParams = new PropertiesParameters();
-        curveParams.load(raw);
-        Log.v("log004: curveParams: ", curveParams.toString());
-        Pairing bp = PairingFactory.getPairing(curveParams);
+        Pairing bp = initBp();
 
         // 文件存储路径
         String pkFileName = "pk.properties";
         String mskFileName = "msk.properties";
-        String skFileName = "sk.properties";
-        String ctFileName1 = "ct1.properties";
-        String ctFileName2 = "ct2.properties";
 
-
-        // 明文消息
-        String mes = "\tat it.unisa.dia.gas.plaf.jpbc.field.curve.ImmutableCurveElement)";
-        System.out.println("明文:" + mes);
-
-        Map<Integer, String> structMes = new HashMap<>();
-        structMes.put(1, "test1");
-        structMes.put(2, "test2");
-        structMes.put(3, "test3");
-
-        // 用户拥有的属性表
-//        String[] userAttList = {"Hedgehog", "zshw@outlook.com", "13204163804"};
-        String[] userAttList = {"nameAndPhoneAndId"};
-
-        Node[] nodes = new Node[7];
-        nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
-        nodes[1] = new Node(1, "idForRoad");
-        nodes[2] = new Node(2, new int[]{1, 2}, new int[]{3, 4}, 2);
-        nodes[3] = new Node(3, "idForSender");
-        nodes[4] = new Node(4, new int[]{2, 3}, new int[]{5, 6}, 3);
-        nodes[5] = new Node(5, "InvitorId");
-        nodes[6] = new Node(6, "name123id");
-
-
-
-        AccessTree accessTree = new AccessTree(nodes, bp);
+        // 生成参数
         Map<String, Properties> pkAndMsk = CP_ABE.setup(bp);
 
+        // 设置显示
         tv_pk.setText(Objects.requireNonNull(pkAndMsk.get(pkFileName)).toString());
         tv_msk.setText(Objects.requireNonNull(pkAndMsk.get(mskFileName)).toString());
 
-        // 初始化公共参数并写入文件
+        // 写入文件
         for (String key : pkAndMsk.keySet()) {
             if( pkAndMsk.get(key) !=null){
-                Properties temPro = pkAndMsk.get(key);
-                SharedPreferences abe_show = requireActivity().getSharedPreferences("show_"+key, Context.MODE_PRIVATE);
-                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-                for (String property_key : temPro.stringPropertyNames()){
-                    editor.putString(property_key, temPro.getProperty(property_key));
-                    System.out.println("log006： "+"show_"+key+": "+property_key+"："+temPro.getProperty(property_key));
+                if(recordData(pkAndMsk.get(key), "show_"+key)){
+                    Toast.makeText(getActivity(),"初始化公共参数成功！",Toast.LENGTH_SHORT).show();
                 }
-                editor.apply();
             }else{
                 break;
             }
-            writeFile(Objects.requireNonNull(pkAndMsk.get(key)), "show_"+key);
-//            writeFile(Objects.requireNonNull(pkAndMsk.get(key)), key);
         }
-        Toast.makeText(getActivity(),"初始化公共参数成功！",Toast.LENGTH_SHORT).show();
+    }
+
+    private boolean recordData(Properties temPro, String SPName) {
+        try {
+            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+            for (String property_key : temPro.stringPropertyNames()){
+                editor.putString(property_key, temPro.getProperty(property_key));
+            }
+            editor.apply();
+            return true;
+        }catch(Exception e){
+            return false;
+        }
+    }
+
+    private Pairing initBp() {
+        // 生成椭圆曲线群
+        InputStream raw = getResources().openRawResource(R.raw.a);
+        PropertiesParameters curveParams = new PropertiesParameters();
+        curveParams.load(raw);
+//        Log.v("log004: curveParams: ", curveParams.toString());
+        return PairingFactory.getPairing(curveParams);
     }
 }

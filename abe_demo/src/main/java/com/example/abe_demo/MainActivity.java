@@ -433,4 +433,5 @@ public class MainActivity extends AppCompatActivity {
         bit = Bitmap.createBitmap(colors, width, height, Bitmap.Config.RGB_565);
         imageView.setImageBitmap(bit);
     }
+
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,125 +10,147 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/tv_show1"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/introduce_for_setup" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:orientation="vertical"
-                tools:ignore="RtlHardcoded">
-                <Button
-                    android:layout_marginRight="20dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:id="@+id/btn_run_setup"
-                    android:textSize="11sp"
-                    android:text="@string/btn_run_setup"
-                    android:gravity="right"
-                    />
+                android:layout_margin="15dp"
+                android:padding="0dp"
+                app:cardUseCompatPadding="false"
+                app:contentPadding="0dp"
+                app:cardPreventCornerOverlap="true"
+                app:cardBackgroundColor="@color/cardview_light_background"
+                app:cardCornerRadius="15dp"
+                app:cardElevation="18dp">
 
-            </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_show1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="15dp"
+                        android:paddingTop="15dp"
+                        android:paddingRight="15dp"
+                        android:text="@string/introduce_for_setup"
+                        android:textSize="15sp" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:orientation="vertical"
+                        tools:ignore="RtlHardcoded">
+
+                        <Button
+                            android:id="@+id/btn_run_setup"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:layout_marginRight="20dp"
+                            android:gravity="right"
+                            android:text="@string/btn_run_setup"
+                            android:textSize="11sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+
+            </com.google.android.material.card.MaterialCardView>
 
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_margin="10dp"
                 android:layout_height="1dp"
+                android:layout_margin="10dp"
                 android:background="@color/md_theme_light_primary"
-                android:padding="15dp"/>
+                android:padding="15dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/setup_need" />
+                android:text="@string/setup_need"
+                android:textSize="15sp" />
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:id="@+id/tv_show_setup_needed"
-                android:paddingTop="15dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
+                android:paddingTop="15dp"
                 android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/nothing" />
+                android:text="@string/nothing"
+                android:textSize="15sp" />
 
             <TextView
                 android:layout_width="match_parent"
-                android:layout_margin="10dp"
                 android:layout_height="1dp"
+                android:layout_margin="10dp"
                 android:background="@color/md_theme_light_primary"
-                android:padding="15dp"/>
+                android:padding="15dp" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/setup_given" />
-
+                android:text="@string/setup_given"
+                android:textSize="15sp" />
 
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:id="@+id/tv_show2"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/pk" />
-
-            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingTop="15dp"
+                android:paddingRight="15dp"
+                android:text="@string/pk"
+                android:textSize="15sp" />
+
+            <TextView
                 android:id="@+id/tv_show_setup_pk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/waiting_init" />
+                android:text="@string/waiting_init"
+                android:textSize="15sp" />
 
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:id="@+id/tv_show3"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/msk" />
-
-            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:paddingLeft="15dp"
+                android:paddingTop="15dp"
+                android:paddingRight="15dp"
+                android:text="@string/msk"
+                android:textSize="15sp" />
+
+            <TextView
                 android:id="@+id/tv_show_setup_msk"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/waiting_init" />
+                android:text="@string/waiting_init"
+                android:textSize="15sp" />
 
         </LinearLayout>
 
     </ScrollView>
-
-
 
 
 </FrameLayout>

@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.abe_demo.R;
 import com.example.abe_demo.abe_tools.AccessTree;
@@ -112,62 +113,20 @@ public class EncryptActionFragment extends Fragment {
         });
     }
 
-    private void writeFile(Properties prop, String FileName) {
-        try {
-            FileOutputStream fos = requireActivity().openFileOutput(FileName, Context.MODE_PRIVATE);
-            prop.store(fos, null);
-//            Toast.makeText(this, FileName + "保存成功", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-//            Toast.makeText(this, FileName+"保存失败", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    private Properties readFile(String FileName, boolean needProp) {
-        try {
-            Properties prop = new Properties();
-            FileInputStream fis = requireActivity().openFileInput(FileName);
-            prop.load(fis);
-//            Toast.makeText(this, FileName + "读取成功", Toast.LENGTH_SHORT).show();
-            return prop;
-        } catch (IOException e) {
-            e.printStackTrace();
-//            Toast.makeText(this, FileName + "读取失败", Toast.LENGTH_SHORT).show();
-            return new Properties();
-        }
-    }
-
     private void encrypt(){
-
-
         // 生成椭圆曲线群
-        InputStream raw = getResources().openRawResource(R.raw.a);
-        PropertiesParameters curveParams = new PropertiesParameters();
-        curveParams.load(raw);
-        Log.v("log004: curveParams: ", curveParams.toString());
-        Pairing bp = PairingFactory.getPairing(curveParams);
+        Pairing bp = initBp();
 
         // 文件存储路径
         String pkFileName = "pk.properties";
-        String mskFileName = "msk.properties";
-        String skFileName = "sk.properties";
-        String ctFileName1 = "ct1.properties";
-        String ctFileName2 = "ct2.properties";
 
-
-        // 明文消息
-        String mes = "\tat it.unisa.dia.gas.plaf.jpbc.field.curve.ImmutableCurveElement)";
-        System.out.println("明文:" + mes);
-
+        // 结构化信息存储
         Map<Integer, String> structMes = new HashMap<>();
         structMes.put(1, "test1");
         structMes.put(2, "test2");
         structMes.put(3, "test3");
 
-        // 用户拥有的属性表
-//        String[] userAttList = {"Hedgehog", "zshw@outlook.com", "13204163804"};
-        String[] userAttList = {"name123id"};
-
+        // 访问树结构
         Node[] nodes = new Node[7];
         nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
         nodes[1] = new Node(1, "idForRoad");
@@ -177,76 +136,74 @@ public class EncryptActionFragment extends Fragment {
         nodes[5] = new Node(5, "InvitorId");
         nodes[6] = new Node(6, "name123id");
 
-
-
         AccessTree accessTree = new AccessTree(nodes, bp);
 
-        // 获取安卓内部存储
-        SharedPreferences showPkSP = requireActivity().getSharedPreferences("show_" + pkFileName, Context.MODE_PRIVATE);
+        // 获取公钥
+        Properties pkProp = getData("show_" + pkFileName);
 
-
-
-//!!!!!!!!!!!!!!!!!
-        Properties pkProp =  new Properties();
-
-        for(String key :showPkSP.getAll().keySet()){
-            if(showPkSP.getAll().get(key) != null){
-                pkProp.put(key, showPkSP.getString(key, ""));
-            }
-        }
-
+        // 展示公钥
         tv_show_encrypt_needed_pk.setText(pkProp.toString());
 
-
-        //        // 处理明文消息
-//        List<String> messageStringGroup;
-////        StringBuilder messageBigNumStringGroup = new StringBuilder();
-        List<String> messageBigNumStringGroup = new LinkedList<>();
-//        List<Element> messageGroup = new LinkedList<>();
-//        messageStringGroup = CodeConvert.mesToBigNumGroup(mes);
-//        for (String mesBigNum : messageStringGroup) {
-//            messageGroup.add(bp.getGT().newElement(new BigInteger(mesBigNum)));
-//        }
-
-
-        Map<String, Properties> ct1AndCt2 = null;
+        // 生成加密密文
+        Map<String, Properties> ct1AndCt2 = new HashMap<>();
         try {
             ct1AndCt2 = CP_ABE.encrypt(bp, structMes, accessTree, pkProp);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-        Log.v("log", "加密成功！");
 
-        Properties test = ct1AndCt2.get(ctFileName2);
-        StringBuilder sb = new StringBuilder();
-        if (test != null) {
-            for(Object key : test.keySet()){
-                Object value = test.get(key);
-                sb.append((key.toString() + value), 0, (key.toString() + value).length()).append("\n");
-            }
-        }
-
-        StringBuilder sb_in_encrypt = new StringBuilder();
-        for (String key : ct1AndCt2.keySet()) {
-            if( ct1AndCt2.get(key) !=null){
-                Properties temPro = ct1AndCt2.get(key);
-                SharedPreferences abe_show = requireActivity().getSharedPreferences("show_"+key, Context.MODE_PRIVATE);
-                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-                for (String property_key : temPro.stringPropertyNames()){
-                    editor.putString(property_key, temPro.getProperty(property_key));
+        // 写入sp并展示
+        try {
+            StringBuilder sb_in_encrypt = new StringBuilder();
+            for (String key : ct1AndCt2.keySet()) {
+                if( ct1AndCt2.get(key) !=null){
+                    if(recordData(ct1AndCt2.get(key),"show_"+key)){
+                        sb_in_encrypt.append("密文组件").append(key.substring(0,3)).append("：\n").append(ct1AndCt2.get(key).toString()).append("\n\n");
+                    }
+                }else{
+                    break;
                 }
-                editor.apply();
-            }else{
-                break;
             }
-
-//            !!!!!!!!!!!!!!!
-            writeFile(Objects.requireNonNull(ct1AndCt2.get(key)), "show_"+key);
-//            writeFile(Objects.requireNonNull(ct1AndCt2.get(key)), key);
-            sb_in_encrypt.append("密文组件").append(key.substring(0,3)).append("：\n").append(ct1AndCt2.get(key).toString()).append("\n\n");
+            // 设置展示
+            tv_show_encrypt_ct.setText(sb_in_encrypt);
+            Toast.makeText(getActivity(),"加密密文生成成功！",Toast.LENGTH_SHORT).show();
+        }catch (Exception e){
+            Toast.makeText(getActivity(),"加密密文生成失败！",Toast.LENGTH_SHORT).show();
         }
 
-        tv_show_encrypt_ct.setText(sb_in_encrypt);
-        Log.v("log", "加密密文写入文件成功！");
+    }
+
+    private Properties getData(String SPName) {
+        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+        Properties prop =new Properties() ;
+        for(String key :SP.getAll().keySet()){
+            if(!SP.getString(key, "").equals("")){
+                prop.put(key, SP.getString(key, ""));
+            }
+        }
+        return prop;
+    }
+
+    private boolean recordData(Properties temPro, String SPName) {
+        try {
+            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+            for (String property_key : temPro.stringPropertyNames()){
+                editor.putString(property_key, temPro.getProperty(property_key));
+            }
+            editor.apply();
+            return true;
+        }catch(Exception e){
+            return false;
+        }
+    }
+
+    private Pairing initBp() {
+        // 生成椭圆曲线群
+        InputStream raw = getResources().openRawResource(R.raw.a);
+        PropertiesParameters curveParams = new PropertiesParameters();
+        curveParams.load(raw);
+//        Log.v("log004: curveParams: ", curveParams.toString());
+        return PairingFactory.getPairing(curveParams);
     }
 }
