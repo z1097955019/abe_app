@@ -1,6 +1,8 @@
 package com.example.abe_demo.show_mode.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -164,7 +166,7 @@ public class EncryptActionFragment extends Fragment {
 
         // 用户拥有的属性表
 //        String[] userAttList = {"Hedgehog", "zshw@outlook.com", "13204163804"};
-        String[] userAttList = {"nameAndPhoneAndId"};
+        String[] userAttList = {"name123id"};
 
         Node[] nodes = new Node[7];
         nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
@@ -173,16 +175,25 @@ public class EncryptActionFragment extends Fragment {
         nodes[3] = new Node(3, "idForSender");
         nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
         nodes[5] = new Node(5, "InvitorId");
-        nodes[6] = new Node(6, "nameAndPhoneAndId");
+        nodes[6] = new Node(6, "name123id");
 
 
 
         AccessTree accessTree = new AccessTree(nodes, bp);
-        Map<String, Properties> pkAndMsk = CP_ABE.setup(bp);
+
+        // 获取安卓内部存储
+        SharedPreferences showPkSP = requireActivity().getSharedPreferences("show_" + pkFileName, Context.MODE_PRIVATE);
+
+
+
 //!!!!!!!!!!!!!!!!!
-        Properties pkProp =  readFile("show_"+pkFileName, true);
-//        Properties pkProp =  readFile(pkFileName, true);
-        Properties mskProp =  readFile("show_"+mskFileName, true);
+        Properties pkProp =  new Properties();
+
+        for(String key :showPkSP.getAll().keySet()){
+            if(showPkSP.getAll().get(key) != null){
+                pkProp.put(key, showPkSP.getString(key, ""));
+            }
+        }
 
         tv_show_encrypt_needed_pk.setText(pkProp.toString());
 
@@ -217,6 +228,18 @@ public class EncryptActionFragment extends Fragment {
 
         StringBuilder sb_in_encrypt = new StringBuilder();
         for (String key : ct1AndCt2.keySet()) {
+            if( ct1AndCt2.get(key) !=null){
+                Properties temPro = ct1AndCt2.get(key);
+                SharedPreferences abe_show = requireActivity().getSharedPreferences("show_"+key, Context.MODE_PRIVATE);
+                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+                for (String property_key : temPro.stringPropertyNames()){
+                    editor.putString(property_key, temPro.getProperty(property_key));
+                }
+                editor.apply();
+            }else{
+                break;
+            }
+
 //            !!!!!!!!!!!!!!!
             writeFile(Objects.requireNonNull(ct1AndCt2.get(key)), "show_"+key);
 //            writeFile(Objects.requireNonNull(ct1AndCt2.get(key)), key);

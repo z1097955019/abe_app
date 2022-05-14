@@ -1,6 +1,8 @@
 package com.example.abe_demo.show_mode.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -173,7 +175,7 @@ public class SetupActionFragment extends Fragment {
         nodes[3] = new Node(3, "idForSender");
         nodes[4] = new Node(4, new int[]{2, 3}, new int[]{5, 6}, 3);
         nodes[5] = new Node(5, "InvitorId");
-        nodes[6] = new Node(6, "nameAndPhoneAndId");
+        nodes[6] = new Node(6, "name123id");
 
 
 
@@ -185,7 +187,18 @@ public class SetupActionFragment extends Fragment {
 
         // 初始化公共参数并写入文件
         for (String key : pkAndMsk.keySet()) {
-//            !!!!!!!!!!!!!!!!
+            if( pkAndMsk.get(key) !=null){
+                Properties temPro = pkAndMsk.get(key);
+                SharedPreferences abe_show = requireActivity().getSharedPreferences("show_"+key, Context.MODE_PRIVATE);
+                @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+                for (String property_key : temPro.stringPropertyNames()){
+                    editor.putString(property_key, temPro.getProperty(property_key));
+                    System.out.println("log006： "+"show_"+key+": "+property_key+"："+temPro.getProperty(property_key));
+                }
+                editor.apply();
+            }else{
+                break;
+            }
             writeFile(Objects.requireNonNull(pkAndMsk.get(key)), "show_"+key);
 //            writeFile(Objects.requireNonNull(pkAndMsk.get(key)), key);
         }

@@ -11,8 +11,9 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/main_toolbar"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="?attr/actionBarSize"
         app:title=""
+        android:theme="@style/ThemeOverlay.MaterialComponents.Toolbar.Surface"
         app:elevation="0dp">
 
         <TextView
@@ -30,16 +31,27 @@
         android:id="@+id/draw_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="10dp"
-        android:layout_marginEnd="10dp"
         tools:openDrawer="end">
+
+        <FrameLayout
+            android:id="@+id/qa"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="我想知道这个到底显示了什么"
+                android:layout_gravity="bottom"
+                android:height="100dp"/>
+
+        </FrameLayout>
 
 
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
-
-
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/float_button"
@@ -75,7 +87,11 @@
             app:menu="@menu/drawer_nav_menu" />
 
 
+
+
     </androidx.drawerlayout.widget.DrawerLayout>
+
+
 
 
 </LinearLayout>

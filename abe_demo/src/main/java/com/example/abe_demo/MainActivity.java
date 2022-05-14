@@ -316,7 +316,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 用户拥有的属性表
 //        String[] userAttList = {"Hedgehog", "zshw@outlook.com", "13204163804"};
-        String[] userAttList = {"nameAndPhoneAndId"};
+        String[] userAttList = {"nameAndPhoneAndId1"};
 
         Node[] nodes = new Node[7];
         nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);

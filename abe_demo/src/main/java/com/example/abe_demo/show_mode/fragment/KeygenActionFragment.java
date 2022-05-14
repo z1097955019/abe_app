@@ -1,6 +1,8 @@
 package com.example.abe_demo.show_mode.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -19,6 +21,7 @@ import com.example.abe_demo.R;
 import com.example.abe_demo.abe_tools.AccessTree;
 import com.example.abe_demo.abe_tools.CP_ABE;
 import com.example.abe_demo.abe_tools.Node;
+import com.google.android.material.snackbar.Snackbar;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -27,6 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Properties;
@@ -142,7 +147,6 @@ public class KeygenActionFragment extends Fragment {
         InputStream raw = getResources().openRawResource(R.raw.a);
         PropertiesParameters curveParams = new PropertiesParameters();
         curveParams.load(raw);
-        Log.v("log004: curveParams: ", curveParams.toString());
         Pairing bp = PairingFactory.getPairing(curveParams);
 
         // 文件存储路径
@@ -150,14 +154,31 @@ public class KeygenActionFragment extends Fragment {
         String mskFileName = "msk.properties";
         String skFileName = "sk.properties";
 
+        // 获取安卓内部存储
+        SharedPreferences showPkSP = requireActivity().getSharedPreferences("show_" + pkFileName, Context.MODE_PRIVATE);
+        SharedPreferences showMskSP = requireActivity().getSharedPreferences("show_" + mskFileName, Context.MODE_PRIVATE);
+        SharedPreferences personal_mes = requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE);
+
         // 用户拥有的属性表
-        String[] userAttList = {"nameAndPhoneAndId"};
+        String[] userAttList = {personal_mes.getString("nameAndPhoneAndId", "")};
+        Snackbar.make(getView(),userAttList[0],Snackbar.LENGTH_SHORT).show();
+
+        Properties pkProp =new Properties() ;
+        Properties mskProp =new Properties();
+
+        for(String key :showPkSP.getAll().keySet()){
+            if(!showPkSP.getString(key, "").equals("")){
+                pkProp.put(key, showPkSP.getString(key, ""));
+            }
+        }
+
+        for(String key :showMskSP.getAll().keySet()){
+            if(showMskSP.getAll().get(key) != null){
+                mskProp.put(key, showMskSP.getString(key, ""));
+            }
+        }
 
 
-        // 生成用户密钥
-//        !!!!!!!!!!
-        Properties pkProp =  readFile("show_"+pkFileName, true);
-        Properties mskProp =  readFile("show_"+mskFileName, true);
 //        Properties pkProp =  readFile(pkFileName, true);
 //        Properties mskProp =  readFile(mskFileName, true);
         tv_show_keygen_needed_pk.setText(pkProp.toString());
@@ -169,9 +190,16 @@ public class KeygenActionFragment extends Fragment {
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-//        !!!!!!!!!!!!!!!
+
+        if( sk!=null){
+            SharedPreferences abe_show = requireActivity().getSharedPreferences("show_"+skFileName, Context.MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+            for (String property_key : sk.stringPropertyNames()){
+                editor.putString(property_key, sk.getProperty(property_key));
+            }
+            editor.apply();
+        }
         writeFile(Objects.requireNonNull(sk), "show_"+skFileName);
-//        writeFile(Objects.requireNonNull(sk), skFileName);
 
         tv_show_keygen_sk.setText(sk.toString());
 

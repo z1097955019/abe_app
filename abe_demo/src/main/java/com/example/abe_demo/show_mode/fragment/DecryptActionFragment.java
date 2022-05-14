@@ -1,6 +1,7 @@
 package com.example.abe_demo.show_mode.fragment;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -167,7 +168,7 @@ public class DecryptActionFragment extends Fragment {
 
         // 用户拥有的属性表
 //        String[] userAttList = {"Hedgehog", "zshw@outlook.com", "13204163804"};
-        String[] userAttList = {"nameAndPhoneAndId"};
+        String[] userAttList = {"name123id"};
 
         Node[] nodes = new Node[7];
         nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
@@ -176,16 +177,40 @@ public class DecryptActionFragment extends Fragment {
         nodes[3] = new Node(3, "idForSender");
         nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
         nodes[5] = new Node(5, "InvitorId");
-        nodes[6] = new Node(6, "nameAndPhoneAndId");
+        nodes[6] = new Node(6, "name123id");
 
 
 
         AccessTree accessTree = new AccessTree(nodes, bp);
 //!!!!!!!!!!!!!!!
-        Properties ct1Prop =  readFile("show_"+ctFileName1, true);
-        Properties ct2Prop =  readFile("show_"+ctFileName2, true);
-        Properties skProp =  readFile("show_"+skFileName, true);
+//        Properties ct1Prop =  readFile("show_"+ctFileName1, true);
+//        Properties ct2Prop =  readFile("show_"+ctFileName2, true);
+//        Properties skProp =  readFile("show_"+skFileName, true);
 
+        Properties ct1Prop =  new Properties();
+        Properties ct2Prop = new Properties();
+        Properties skProp =  new Properties();
+
+        // 获取安卓内部存储
+        SharedPreferences showCt1SP = requireActivity().getSharedPreferences("show_"+ctFileName1, Context.MODE_PRIVATE);
+        SharedPreferences showCt2SP = requireActivity().getSharedPreferences("show_"+ctFileName2, Context.MODE_PRIVATE);
+        SharedPreferences showSkSP = requireActivity().getSharedPreferences("show_"+skFileName, Context.MODE_PRIVATE);
+
+        for(String key :showCt1SP.getAll().keySet()){
+            if(!showCt1SP.getString(key, "").equals("")){
+                ct1Prop.put(key, showCt1SP.getString(key, ""));
+            }
+        }
+        for(String key :showCt2SP.getAll().keySet()){
+            if(!showCt2SP.getString(key, "").equals("")){
+                ct2Prop.put(key, showCt2SP.getString(key, ""));
+            }
+        }
+        for(String key :showSkSP.getAll().keySet()){
+            if(!showSkSP.getString(key, "").equals("")){
+                skProp.put(key, showSkSP.getString(key, ""));
+            }
+        }
 //        Properties ct1Prop =  readFile(ctFileName1, true);
 //        Properties ct2Prop =  readFile(ctFileName2, true);
 //        Properties skProp =  readFile(skFileName, true);
