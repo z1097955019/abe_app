@@ -15,7 +15,7 @@
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_access_tree.xml" value="0.13722826086956522" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_defined.xml" value="0.1921875" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_display.xml" value="0.24909420289855072" />
-        <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_home.xml" value="0.22" />
+        <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_home.xml" value="0.1" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_scan_qrcode.xml" value="0.37135416666666665" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/activity_show_mode.xml" value="0.25" />
@@ -29,7 +29,7 @@
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/fragment_keygen_action.xml" value="0.24909420289855072" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/fragment_mode_access_tree.xml" value="0.34193840579710144" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/fragment_setup.xml" value="0.25" />
-        <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/fragment_setup_action.xml" value="0.33" />
+        <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/fragment_setup_action.xml" value="0.1" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/layout/fragment_show_mode.xml" value="0.33" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/menu/bottom_nav_menu.xml" value="0.37135416666666665" />
         <entry key="..\:/Android/demo/abe_demo/src/main/res/menu/drawer_nav_menu.xml" value="0.37135416666666665" />

@@ -33,30 +33,40 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"
-                        android:text="@string/keygen_introduce_title" />
+                        android:text="@string/keygen_introduce_title"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                     <TextView
                         android:id="@+id/tv_show1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:paddingTop="15dp"
-                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium"
-                        android:text="@string/introduce_for_keygen" />
+                        android:text="@string/introduce_for_keygen"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:gravity="right"
-                        android:orientation="vertical"
+                        android:orientation="horizontal"
                         tools:ignore="RtlHardcoded">
 
                         <Button
                             android:id="@+id/btn_run_keygen"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
+                            android:layout_marginEnd="15dp"
                             android:gravity="center"
                             android:text="@string/btn_run_keygen"
+                            android:textSize="11sp" />
+
+                        <Button
+                            android:id="@+id/btn_run_keygen_default"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:gravity="center"
+                            android:text="@string/btn_run_keygen_default"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -86,7 +96,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/keygen_need"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"/>
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -99,7 +109,7 @@
                         android:id="@+id/tv_show_keygen_needed_pk"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"/>
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -112,7 +122,7 @@
                         android:id="@+id/tv_show_keygen_needed_msk"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"/>
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
                 </LinearLayout>
 
             </com.google.android.material.card.MaterialCardView>
@@ -154,7 +164,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/waiting_init"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"/>
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
                 </LinearLayout>
 

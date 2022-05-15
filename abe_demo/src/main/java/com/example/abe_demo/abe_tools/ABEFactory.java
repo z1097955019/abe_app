@@ -8,8 +8,14 @@ import android.widget.Toast;
 import com.example.abe_demo.R;
 import com.example.abe_demo.abe_tools.utils.CodeConvert;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +39,14 @@ public class ABEFactory {
     private final String ctFileName2 = "ct2.properties";
     private final String mingFileName = "ming.properties";
     private final String ming_before = "clearTB.properties";
+
+    private final String defaultPkFileName = "show_default_" + pkFileName;
+    private final String defaultMskFileName = "show_default_" + mskFileName;
+    private final String defaultSkFileName = "show_default_" + mskFileName;
+    private final String defaultCtFileName1 = "show_default_" + mskFileName;
+    private final String defaultCtFileName2 = "show_default_" + mskFileName;
+    private final String defaultMingFileName = "show_default_" + mskFileName;
+    private final String defaultMing_before = "show_default_" + mskFileName;
 
     public ABEFactory(Context context) {
         this.context = context;
@@ -63,6 +77,22 @@ public class ABEFactory {
         }
     }
 
+    public void keygen(boolean isDefault) {
+
+        Properties defaultPk = readFile(R.raw.pk);
+        Properties defaultMsk = readFile(R.raw.msk);
+        System.out.println("log012: defaultPk " + defaultPk);
+        System.out.println("log012: defaultMsk " + defaultMsk);
+        if (recordData(defaultPk, "show_" + pkFileName) && recordData(defaultMsk, "show_" + mskFileName)) {
+            try {
+                keygen(pkFileName, mskFileName, skFileName);
+            } catch (Exception e) {
+                System.out.println("log012: e " + e);
+
+            }
+        }
+    }
+
     public void keygen() {
         keygen(pkFileName, mskFileName, skFileName);
     }
@@ -70,24 +100,31 @@ public class ABEFactory {
     public void keygen(String pkFileName, String mskFileName, String skFileName) {
         // 生成椭圆曲线群
         Pairing bp = initBp();
+        System.out.println("log012: 生成椭圆曲线群 ");
 
         // 初始化相关参数
         Properties pkProp = getData("show_" + pkFileName);
         Properties mskProp = getData("show_" + mskFileName);
 
+        System.out.println("log012: 初始化相关参数 ");
+
+
         // 获取用户相关信息
         SharedPreferences personal_mes = context.getSharedPreferences("personal_mes", Context.MODE_PRIVATE);
+        System.out.println("log012: 获取用户相关信息 ");
 
         // 用户拥有的属性表
         String[] userAttList = {personal_mes.getString("nameAndPhoneAndId", "")};
 
+        System.out.println("log012: 用户拥有的属性表 ");
 
         // 根据用户属性生成sk
         Properties sk = new Properties();
         try {
+            System.out.println("log012: " + Arrays.toString(userAttList) + pkProp.toString() + mskProp.toString());
             sk = CP_ABE.keygen(bp, userAttList, pkProp, mskProp);
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
+        } catch (Exception e) {
+            System.out.println("log012: e2 " + e);
         }
 
         // 展示
@@ -105,6 +142,9 @@ public class ABEFactory {
         encrypt(pkFileName, ming_before);
     }
 
+    public void encrypt(boolean isDefault) {
+        encrypt(defaultPkFileName, defaultMing_before);
+    }
 
     public void encrypt(String pkFileName, String ming_before) {
         // 生成椭圆曲线群
@@ -163,17 +203,31 @@ public class ABEFactory {
         }
     }
 
-    public void decrypt() {
-        decrypt(ctFileName1, ctFileName2, skFileName, mingFileName);
+    public String decrypt(String ct2, boolean getCt2FromStr) {
+        return decrypt(ctFileName1, ct2, skFileName, mingFileName, !getCt2FromStr);
     }
 
-    public void decrypt(String ctFileName1, String ctFileName2, String skFileName, String mingFileName) {
+    public String decrypt() {
+        return decrypt(ctFileName1, ctFileName2, skFileName, mingFileName, true);
+    }
+
+    public String decrypt(String ctFileName1, String ct2, String skFileName, String mingFileName, boolean ct2IsName) {
+        Properties ct2Prop;
+        if (ct2IsName) {
+            ct2Prop = getData("show_" + ctFileName2);
+        } else {
+            ct2Prop = load(ct2);
+        }
+        return decrypt(ctFileName1, ct2Prop, skFileName, mingFileName);
+    }
+
+    public String decrypt(String ctFileName1, Properties ct2Prop, String skFileName, String mingFileName) {
         // 生成椭圆曲线群
         Pairing bp = initBp();
 
         // 初始化数据
         Properties ct1Prop = getData("show_" + ctFileName1);
-        Properties ct2Prop = getData("show_" + ctFileName2);
+//        Properties ct2Prop = getData("show_" + ctFileName2);
         Properties skProp = getData("show_" + skFileName);
 
         Map<Integer, String> structMes = new HashMap<>();
@@ -196,8 +250,15 @@ public class ABEFactory {
         // 存储解密信息
         List<String> messageBigNumStringGroup = new LinkedList<>();
 
+        System.out.println("log013: !!!" + ct1Prop.toString() + "-=-=-=-" + ct2Prop.toString() + "-=-=-=-" + skProp.toString());
+
+        List<Element> res = null;
         // 解密部分
-        List<Element> res = CP_ABE.Decrypt(bp, accessTree, ct1Prop, ct2Prop, skProp, true);
+        try {
+            res = CP_ABE.Decrypt(bp, accessTree, ct1Prop, ct2Prop, skProp, true);
+        } catch (Exception e) {
+            System.out.println("log013: e2" + e);
+        }
 
         // 转译展示解密的明文
         if (!(res == null)) {
@@ -216,9 +277,13 @@ public class ABEFactory {
             } else {
                 Toast.makeText(context, "解密失败", Toast.LENGTH_SHORT).show();
             }
+            return resString;
+        }else {
+            return "";
         }
     }
 
+    // 从指定sp中获取结构化的明文
     private Map<Integer, String> getClearTextFromSP(String SPName) {
         SharedPreferences SP = context.getSharedPreferences(SPName, Context.MODE_PRIVATE);
         Map<Integer, String> clearText = new HashMap<>();
@@ -230,6 +295,7 @@ public class ABEFactory {
         return clearText;
     }
 
+    // 处理加密算法回传的ct属性对象，将其编码为字符串列表
     public List<String> dealCts(Map<String, Properties> ct1AndCt2) {
         List<String> cts = new LinkedList<>();
         try {
@@ -238,18 +304,21 @@ public class ABEFactory {
                 if (ct1AndCt2.get(key) != null) {
                     if (recordData(ct1AndCt2.get(key), "show_" + key)) {
                         cts.add(propToString(ct1AndCt2.get(key)));
-                        sb_in_encrypt.append("密文组件").append(key.substring(0, 3)).append("：\n").append(ct1AndCt2.get(key).toString()).append("\n\n");
+                        sb_in_encrypt.append("密文组件").append(key.substring(0, 3)).append(ct1AndCt2.get(key).toString());
+
                     }
                 } else {
                     break;
                 }
             }
+            System.out.println("log013: " + sb_in_encrypt);
             return cts;
         } catch (Exception e) {
             return cts;
         }
     }
 
+    // 将prop对象转换成指定格式字符串
     private String propToString(Properties properties) {
         StringBuilder sb = new StringBuilder();
         for (Object key : properties.keySet()) {
@@ -258,6 +327,7 @@ public class ABEFactory {
         return sb.substring(0, sb.length() - 1);
     }
 
+    // 把property中数据存入指定sp中
     public boolean recordData(Properties temPro, String SPName) {
         try {
             SharedPreferences abe_show = context.getSharedPreferences(SPName, Context.MODE_PRIVATE);
@@ -272,15 +342,16 @@ public class ABEFactory {
         }
     }
 
-    private Pairing initBp() {
+    // 从文件初始化椭圆曲线域参数
+    public Pairing initBp() {
         // 生成椭圆曲线群
         InputStream raw = context.getResources().openRawResource(R.raw.a);
         PropertiesParameters curveParams = new PropertiesParameters();
         curveParams.load(raw);
-//        Log.v("log004: curveParams: ", curveParams.toString());
         return PairingFactory.getPairing(curveParams);
     }
 
+    // 从指定sp中获取全部数据，以property形式回传
     public Properties getData(String SPName) {
         SharedPreferences SP = context.getSharedPreferences(SPName, Context.MODE_PRIVATE);
         Properties prop = new Properties();
@@ -290,5 +361,78 @@ public class ABEFactory {
             }
         }
         return prop;
+    }
+
+    private void writeFile(Properties prop, String FileName) {
+        try {
+            FileOutputStream fos = context.openFileOutput(FileName, Context.MODE_PRIVATE);
+            prop.store(fos, null);
+//            Toast.makeText(this, FileName + "保存成功", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+//            Toast.makeText(this, FileName+"保存失败", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    // 一堆文件存取操作
+    private void writeFile(String mes, String FileName) {
+        try {
+            FileOutputStream fos = context.openFileOutput(FileName, Context.MODE_PRIVATE);
+            fos.write(mes.getBytes(StandardCharsets.UTF_8));
+//            Toast.makeText(this, FileName + "保存成功", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+//            Toast.makeText(this, FileName+"保存失败", Toast.LENGTH_SHORT).show();
+            e.printStackTrace();
+        }
+    }
+
+    private Properties readFile(int id) {
+        try {
+            Properties prop = new Properties();
+            InputStream raw = context.getResources().openRawResource(id);
+            prop.load(raw);
+//            Toast.makeText(this, FileName + "读取成功", Toast.LENGTH_SHORT).show();
+            return prop;
+        } catch (Exception e) {
+//            e.printStackTrace();
+            System.out.println("log012: " + e);
+//            Toast.makeText(this, FileName + "读取失败", Toast.LENGTH_SHORT).show();
+            return new Properties();
+        }
+    }
+
+    private String readFile(String FileName) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try {
+            FileInputStream fis = context.openFileInput(FileName);
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = fis.read(buffer)) != -1) {
+                baos.write(buffer, 0, length);
+            }
+            return baos.toString("UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "false";
+        }
+    }
+
+    // 从固定编码的字符串中加载prop属性对象
+    public Properties load(String propertiesString) {
+        Properties properties = new Properties();
+        try {
+            String[] split = propertiesString.split(",");
+            System.out.println("log010: " + Arrays.toString(split));
+            for (String stringItem : split) {
+                String[] singleStringKeyValue = stringItem.split("=");
+                System.out.println("log010: singleStringKeyValue: " + Arrays.toString(singleStringKeyValue) + "\n\n");
+                if (singleStringKeyValue != null) {
+                    properties.put(singleStringKeyValue[0], singleStringKeyValue[1]);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("log010: " + "?????");
+        }
+        return properties;
     }
 }

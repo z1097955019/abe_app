@@ -25,6 +25,7 @@ import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 
 import com.example.abe_demo.R;
+import com.example.abe_demo.abe_tools.ABEFactory;
 import com.example.abe_demo.abe_tools.AccessTree;
 import com.example.abe_demo.abe_tools.CP_ABE;
 import com.example.abe_demo.abe_tools.Node;
@@ -70,19 +71,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private static final int REQUEST_CODE_DEFINE = 0X0111;
     public static final String RESULT = "SCAN_RESULT";
 
-    // 文件存储路径
-    private final String pkFileName = "pk.properties";
-    private final String mskFileName = "msk.properties";
-    private final String skFileName = "sk.properties";
-    private final String ctFileName1 = "ct1.properties";
-    private final String ctFileName2 = "ct2.properties";
-    private final String mingFileName = "ming.properties";
-
-    private Properties ct1Prop;
-    private Properties ct2Prop;
-    private Properties skProp;
-    private Properties clearTextProp;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -117,12 +105,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                     case R.id.menu_home_arrange:
                         Toast.makeText(getApplicationContext(), "menu_home_arrange", Toast.LENGTH_SHORT).show();
                         break;
-//                    case R.id.menu_home_decrypt:
-//                        Toast.makeText(getApplicationContext(), "menu_home_decrypt",Toast.LENGTH_SHORT).show();
-//                        break;
-//                    case R.id.menu_home_encrypt:
-//                        Toast.makeText(getApplicationContext(), "menu_home_encrypt",Toast.LENGTH_SHORT).show();
-//                        break;
                     case R.id.menu_home_keygen:
                         Toast.makeText(getApplicationContext(), "menu_home_keygen", Toast.LENGTH_SHORT).show();
                         break;
@@ -289,7 +271,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        System.out.println("log009:????????????????????"+ data.toString());
+//        System.out.println("log009:????????????????????"+ data.toString());
         if (resultCode != RESULT_OK || data == null) {
             return;
         }
@@ -298,133 +280,37 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             HmsScan obj = data.getParcelableExtra(ScanUtil.RESULT);
             if (obj != null) {
                 String qrValue = obj.originalValue;
-                new MaterialAlertDialogBuilder(this).setTitle("解密结果：").setMessage("原始数据：\n"+qrValue+"\n\n"+ "解密数据：\n"+decrypt(qrValue)+"\n\n").setPositiveButton("确认", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-                    }
-                }).show();
-
-
-                Intent intent = new Intent(this, DisPlayActivity.class);
-//                startActivity(intent);
+                ABEFactory abeFactory = new ABEFactory(this);
+                String testStr;
+                try {
+                    testStr = abeFactory.decrypt(qrValue,true);
+                    new MaterialAlertDialogBuilder(this).setTitle("解密结果：").setMessage("原始数据：\n"+qrValue+"\n\n"+ "解密数据：\n"+testStr+"\n\n").setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    }).show();
+                }catch (Exception e){
+                    Snackbar.make(navigationView, e.toString(),Snackbar.LENGTH_SHORT).show();
+                }
             }
             //MultiProcessor & Bitmap
         } else if (requestCode == REQUEST_CODE_DEFINE) {
             HmsScan obj = data.getParcelableExtra(DefinedActivity.SCAN_RESULT);
             if (obj != null) {
                 String qrValue = obj.originalValue;
-                new MaterialAlertDialogBuilder(this).setTitle("扫码结果：").setMessage(qrValue).show();
-                Intent intent = new Intent(this, DisPlayActivity.class);
-//                startActivity(intent);
-            }
-        }
-    }
-
-    private String  decrypt(String ct2) {
-        // 生成椭圆曲线群
-        Pairing bp = initBp();
-
-        // 初始化数据
-        ct1Prop = getData("show_" + ctFileName1);
-        ct2Prop = load(ct2);
-        skProp = getData("show_" + skFileName);
-
-        Map<Integer, String> structMes = new HashMap<>();
-        structMes.put(1, "test1");
-        structMes.put(2, "test2");
-        structMes.put(3, "test3");
-
-
-        Node[] nodes = new Node[7];
-        nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
-        nodes[1] = new Node(1, "idForRoad");
-        nodes[2] = new Node(2, new int[]{1, 2}, new int[]{3, 4}, 2);
-        nodes[3] = new Node(3, "idForSender");
-        nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
-        nodes[5] = new Node(5, "InvitorId");
-        nodes[6] = new Node(6, getSharedPreferences("personal_mes", Context.MODE_PRIVATE).getString("nameAndPhoneAndId", ""));
-
-        AccessTree accessTree = new AccessTree(nodes, bp);
-
-        // 存储解密信息
-        List<String> messageBigNumStringGroup = new LinkedList<>();
-
-        // 解密部分
-        List<Element> res = null;
-        try {
-            res = CP_ABE.Decrypt(bp, accessTree, ct1Prop, ct2Prop, skProp, true);
-        }catch (Exception e){
-            System.out.println("log010: "+ e.toString());
-            Snackbar.make(navigationView,e.toString(),Snackbar.LENGTH_SHORT).show();
-        }
-
-
-        // 转译展示解密的明文
-        if (!(res == null)) {
-            for (Element bigNum : res) {
-                messageBigNumStringGroup.add(bigNum.toString().substring(1, bigNum.toString().length() - 1).split(",")[0].substring(2));
-            }
-            String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
-
-            // 存储
-            clearTextProp.put("clearText", resString);
-            return resString;
-        }else {
-            return "无法解密成功！";
-        }
-    }
-
-
-    private Properties getData(String SPName) {
-        SharedPreferences SP = getSharedPreferences(SPName, Context.MODE_PRIVATE);
-        Properties prop = new Properties();
-        for (String key : SP.getAll().keySet()) {
-            if (!SP.getString(key, "").equals("")) {
-                prop.put(key, SP.getString(key, ""));
-            }
-        }
-        return prop;
-    }
-
-
-    private Pairing initBp() {
-        // 生成椭圆曲线群
-        InputStream raw = getResources().openRawResource(R.raw.a);
-        PropertiesParameters curveParams = new PropertiesParameters();
-        curveParams.load(raw);
-//        Log.v("log004: curveParams: ", curveParams.toString());
-        return PairingFactory.getPairing(curveParams);
-    }
-
-    private boolean recordData(Properties temPro, String SPName) {
-        try {
-            SharedPreferences abe_show = getSharedPreferences(SPName, Context.MODE_PRIVATE);
-            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-            for (String property_key : temPro.stringPropertyNames()) {
-                editor.putString(property_key, temPro.getProperty(property_key));
-            }
-            editor.commit();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public Properties load(String propertiesString) {
-        Properties properties = new Properties();
-        try {
-            String[] split = propertiesString.split(",");
-            System.out.println("log010: "+ Arrays.toString(split));
-            for(String stringItem:split){
-                String[] singleStringKeyValue = stringItem.split("=");
-                System.out.println("log010: singleStringKeyValue: "+ Arrays.toString(singleStringKeyValue)+"\n\n");
-                if(singleStringKeyValue!=null){
-                    properties.put(singleStringKeyValue[0],singleStringKeyValue[1]);
+                ABEFactory abeFactory = new ABEFactory(this);
+                String testStr;
+                try {
+                    testStr = abeFactory.decrypt(qrValue,true);
+                    new MaterialAlertDialogBuilder(this).setTitle("解密结果：").setMessage("原始数据：\n"+qrValue+"\n\n"+ "解密数据：\n"+testStr+"\n\n").setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    }).show();
+                }catch (Exception e){
+                    Snackbar.make(navigationView, e.toString(),Snackbar.LENGTH_SHORT).show();
                 }
             }
-        } catch (Exception e) {
-            System.out.println("log010: "+"?????");
         }
-        return properties;
     }
 }

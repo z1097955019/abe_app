@@ -61,6 +61,7 @@ public class EncryptActionFragment extends Fragment {
     private final String ming_before = "clearTB.properties";
 
     private Button btn_run_encrypt;
+    private Button btn_run_encrypt_default;
     private TextView tv_show_encrypt_needed_pk;
     private TextView tv_show_encrypt_ct;
     private TextInputEditText clt1_edt;
@@ -125,6 +126,7 @@ public class EncryptActionFragment extends Fragment {
         abeFactory = new ABEFactory(requireActivity());
 
         btn_run_encrypt = view.findViewById(R.id.btn_run_encrypt);
+        btn_run_encrypt_default = view.findViewById(R.id.btn_run_encrypt_default);
         tv_show_encrypt_needed_pk = view.findViewById(R.id.tv_show_encrypt_needed_pk);
         tv_show_encrypt_ct = view.findViewById(R.id.tv_show_encrypt_ct);
         clt1_edt = view.findViewById(R.id.clt1_edt);
@@ -134,6 +136,14 @@ public class EncryptActionFragment extends Fragment {
         imageView = view.findViewById(R.id.show_qr_code_img);
 
         btn_run_encrypt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                abeFactory.encrypt();
+                initData();
+            }
+        });
+
+        btn_run_encrypt_default.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 abeFactory.encrypt();
@@ -198,136 +208,6 @@ public class EncryptActionFragment extends Fragment {
         clt2_edt.setText(clearText2);
         clt3_edt.setText(clearText3);
     }
-
-//    private void encrypt() {
-//        // 生成椭圆曲线群
-//        Pairing bp = initBp();
-//
-//        // 初始化pk
-//        pkProp = getData("show_" + pkFileName);
-//
-//        // 结构化信息存储
-////        Map<Integer, String> structMes = new HashMap<>();
-////        structMes.put(1, "test1");
-////        structMes.put(2, "test2");
-////        structMes.put(3, "test3");
-//        Map<Integer, String> structMes = getClearTextFromSP("show_" + ming_before);
-//        if (structMes.isEmpty()) {
-//            structMes.put(1, "test1");
-//            structMes.put(2, "test2");
-//            structMes.put(3, "test3");
-//        }
-//        System.out.println("log008" + structMes);
-//
-//        // 访问树结构
-//        Node[] nodes = new Node[7];
-//        nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
-//        nodes[1] = new Node(1, "idForRoad");
-//        nodes[2] = new Node(2, new int[]{1, 2}, new int[]{3, 4}, 2);
-//        nodes[3] = new Node(3, "idForSender");
-//        nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
-//        nodes[5] = new Node(5, "InvitorId");
-//        nodes[6] = new Node(6, requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE).getString("nameAndPhoneAndId", ""));
-//
-//        AccessTree accessTree = new AccessTree(nodes, bp);
-//
-//        // 生成加密密文
-//        Map<String, Properties> ct1AndCt2 = new HashMap<>();
-//        try {
-//            ct1AndCt2 = CP_ABE.encrypt(bp, structMes, accessTree, pkProp);
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
-//
-//        // 写入ct并展示
-//        StringBuilder ctb = new StringBuilder();
-//        List<String> ctList = dealCts(ct1AndCt2);
-//        for (String ctItem : ctList) {
-//            ctb.append(ctItem).append("\n\n");
-//        }
-////        imageView.setImageBitmap(zxing(ctList.get(1)));
-//
-//
-//        if (!ctb.toString().equals("")) {
-////            tv_show_encrypt_ct.setText(ctb.toString());
-//            Toast.makeText(getActivity(), "加密密文生成成功！", Toast.LENGTH_SHORT).show();
-//        } else {
-//            Toast.makeText(getActivity(), "加密密文生成失败！", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-//
-//    private Map<Integer, String> getClearTextFromSP(String SPName) {
-//        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-//        Map<Integer, String> clearText = new HashMap<>();
-//        for (String key : SP.getAll().keySet()) {
-//            if (!SP.getString(key, "").equals("")) {
-//                clearText.put(Integer.valueOf(key), SP.getString(key, ""));
-//            }
-//        }
-//        return clearText;
-//    }
-//
-//    private List<String> dealCts(Map<String, Properties> ct1AndCt2) {
-//        List<String> cts = new LinkedList<>();
-//        try {
-//            StringBuilder sb_in_encrypt = new StringBuilder();
-//            for (String key : ct1AndCt2.keySet()) {
-//                if (ct1AndCt2.get(key) != null) {
-//                    if (recordData(ct1AndCt2.get(key), "show_" + key)) {
-//                        cts.add(propToString(ct1AndCt2.get(key)));
-//                        sb_in_encrypt.append("密文组件").append(key.substring(0, 3)).append("：\n").append(ct1AndCt2.get(key).toString()).append("\n\n");
-//                    }
-//                } else {
-//                    break;
-//                }
-//            }
-//            return cts;
-//        } catch (Exception e) {
-//            return cts;
-//        }
-//    }
-//
-//    private String propToString(Properties properties) {
-//        StringBuilder sb = new StringBuilder();
-//        for (Object key : properties.keySet()) {
-//            sb.append(key.toString()).append("=").append(properties.get(key)).append(",");
-//        }
-//        return sb.substring(0, sb.length() - 1);
-//    }
-//
-//    private Properties getData(String SPName) {
-//        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-//        Properties prop = new Properties();
-//        for (String key : SP.getAll().keySet()) {
-//            if (!SP.getString(key, "").equals("")) {
-//                prop.put(key, SP.getString(key, ""));
-//            }
-//        }
-//        return prop;
-//    }
-//
-//    private boolean recordData(Properties temPro, String SPName) {
-//        try {
-//            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-//            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-//            for (String property_key : temPro.stringPropertyNames()) {
-//                editor.putString(property_key, temPro.getProperty(property_key));
-//            }
-//            editor.commit();
-//            return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
-//
-//    private Pairing initBp() {
-//        // 生成椭圆曲线群
-//        InputStream raw = getResources().openRawResource(R.raw.a);
-//        PropertiesParameters curveParams = new PropertiesParameters();
-//        curveParams.load(raw);
-////        Log.v("log004: curveParams: ", curveParams.toString());
-//        return PairingFactory.getPairing(curveParams);
-//    }
 
 
     private Bitmap zxing(String name) {

@@ -104,4 +104,8 @@
     <string name="clt3">三级明文内容</string>
     <string name="mod">修改</string>
     <string name="show_qr_code">生成的二维码：</string>
+    <string name="btn_run_setup_default">setup (default)</string>
+    <string name="btn_run_keygen_default">keygen (default)</string>
+    <string name="btn_run_encrypt_default">encrypt (default)</string>
+    <string name="btn_run_decrypt_default">decrypt (default)</string>
 </resources>

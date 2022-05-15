@@ -29,6 +29,7 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
                     android:padding="15dp">
+
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -47,16 +48,26 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
                         android:gravity="right"
-                        android:orientation="vertical"
+                        android:orientation="horizontal"
                         tools:ignore="RtlHardcoded">
 
                         <Button
                             android:id="@+id/btn_run_decrypt"
                             android:layout_width="wrap_content"
                             android:layout_height="40dp"
+                            android:layout_marginEnd="15dp"
                             android:gravity="center"
                             android:text="@string/btn_run_decrypt"
+                            android:textSize="11sp" />
+
+                        <Button
+                            android:id="@+id/btn_run_decrypt_default"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:gravity="center"
+                            android:text="@string/btn_run_decrypt_default"
                             android:textSize="11sp" />
 
                     </LinearLayout>
@@ -85,7 +96,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/decrypt_need"
-                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"  />
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
                     <TextView
                         android:layout_width="match_parent"
@@ -153,7 +164,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:text="@string/waiting_init"
-                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"/>
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
 
                 </LinearLayout>
 

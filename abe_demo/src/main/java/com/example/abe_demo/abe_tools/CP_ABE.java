@@ -202,7 +202,7 @@ public class CP_ABE {
         Element C0 = g.powZn(s).getImmutable();
 
         // 写入文件
-        ctProp1.setProperty("C0", Base64.getEncoder().withoutPadding().encodeToString(C0.toBytes()));
+        ctProp2.setProperty("C0", Base64.getEncoder().withoutPadding().encodeToString(C0.toBytes()));
 
         // 将s设置为访问树根节点秘密值并进行秘密共享，设lambda为秘密共享的碎片值
         accessTree.nodes[0].secretShare = s;
@@ -271,7 +271,7 @@ public class CP_ABE {
         Element C0 = g.powZn(s).getImmutable();
 
         // 写入文件
-        ctProp1.setProperty("C0", Base64.getEncoder().withoutPadding().encodeToString(C0.toBytes()));
+        ctProp2.setProperty("C0", Base64.getEncoder().withoutPadding().encodeToString(C0.toBytes()));
 
         // 将整个访问结构的秘密共享碎片写入文件
         for (Node node : accessTree.nodes) {
@@ -327,7 +327,7 @@ public class CP_ABE {
         String userAttListString = skProp.getProperty("userAttList");
         String[] userAttList = userAttListString.substring(1, userAttListString.length() - 1).split(", ");
 
-        Element C0 = FileOperate.loadElementFromProp("C0", ctProp1, bp.getG1());
+        Element C0 = FileOperate.loadElementFromProp("C0", ctProp2, bp.getG1());
         // 从用户密钥文件中恢复存有alpha， beta， t属性的 D 与单独存储t属性的 D0
         Element D = FileOperate.loadElementFromProp("D", skProp, bp.getG1());
         Element D0 = FileOperate.loadElementFromProp("D0", skProp, bp.getG1());
@@ -389,8 +389,7 @@ public class CP_ABE {
         // 从用户密钥文件中读取用户拥有的属性集
         String userAttListString = skProp.getProperty("userAttList");
         String[] userAttList = userAttListString.substring(1, userAttListString.length() - 1).split(", ");
-
-        Element C0 = FileOperate.loadElementFromProp("C0", ctProp1, bp.getG1());
+        Element C0 = FileOperate.loadElementFromProp("C0", ctProp2, bp.getG1());
         // 从用户密钥文件中恢复存有alpha， beta， t属性的 D 与单独存储t属性的 D0
         Element D = FileOperate.loadElementFromProp("D", skProp, bp.getG1());
         Element D0 = FileOperate.loadElementFromProp("D0", skProp, bp.getG1());

@@ -35,6 +35,7 @@ import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
 public class KeygenActionFragment extends Fragment {
 
     private Button btn_run_keygen;
+    private Button btn_run_keygen_default;
     private TextView tv_show_keygen_needed_pk;
     private TextView tv_show_keygen_needed_msk;
     private TextView tv_show_keygen_sk;
@@ -104,6 +105,7 @@ public class KeygenActionFragment extends Fragment {
         abeFactory = new ABEFactory(requireActivity());
 
         btn_run_keygen = view.findViewById(R.id.btn_run_keygen);
+        btn_run_keygen_default = view.findViewById(R.id.btn_run_keygen_default);
         tv_show_keygen_needed_pk = view.findViewById(R.id.tv_show_keygen_needed_pk);
         tv_show_keygen_needed_msk = view.findViewById(R.id.tv_show_keygen_needed_msk);
         tv_show_keygen_sk = view.findViewById(R.id.tv_show_keygen_sk);
@@ -112,6 +114,14 @@ public class KeygenActionFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 abeFactory.keygen();
+                initData();
+            }
+        });
+
+        btn_run_keygen_default.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                abeFactory.keygen(true);
                 initData();
             }
         });
@@ -136,73 +146,4 @@ public class KeygenActionFragment extends Fragment {
             tv_show_keygen_sk.setText(sk.toString());
         }
     }
-
-//    private void keygen() {
-//        // 生成椭圆曲线群
-//        Pairing bp = initBp();
-//
-//        // 初始化相关参数
-//        pkProp = getData("show_" + pkFileName);
-//        mskProp = getData("show_" + mskFileName);
-//
-//        // 获取用户相关信息
-//        SharedPreferences personal_mes = requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE);
-//
-//        // 用户拥有的属性表
-//        String[] userAttList = {personal_mes.getString("nameAndPhoneAndId", "")};
-//
-//
-//        // 根据用户属性生成sk
-//        Properties sk = new Properties();
-//        try {
-//            sk = CP_ABE.keygen(bp, userAttList, pkProp, mskProp);
-//        } catch (NoSuchAlgorithmException e) {
-//            e.printStackTrace();
-//        }
-//
-//        // 展示
-////        tv_show_keygen_sk.setText(sk.toString());
-//
-//        // 存入sp
-//        if (recordData(sk, "show_" + skFileName)) {
-//            Toast.makeText(getActivity(), "生成密钥成功！", Toast.LENGTH_SHORT).show();
-//        } else {
-//            Toast.makeText(getActivity(), "生成密钥失败！", Toast.LENGTH_SHORT).show();
-//        }
-//    }
-//
-//    private Properties getData(String SPName) {
-//        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-//        Properties prop = new Properties();
-//        for (String key : SP.getAll().keySet()) {
-//            if (!SP.getString(key, "").equals("")) {
-//                prop.put(key, SP.getString(key, ""));
-//            }
-//        }
-//        return prop;
-//    }
-//
-//    private boolean recordData(Properties temPro, String SPName) {
-//        try {
-//            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-//            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-//            for (String property_key : temPro.stringPropertyNames()) {
-//                editor.putString(property_key, temPro.getProperty(property_key));
-//            }
-//            editor.commit();
-//            return true;
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
-//
-//
-//    private Pairing initBp() {
-//        // 生成椭圆曲线群
-//        InputStream raw = getResources().openRawResource(R.raw.a);
-//        PropertiesParameters curveParams = new PropertiesParameters();
-//        curveParams.load(raw);
-////        Log.v("log004: curveParams: ", curveParams.toString());
-//        return PairingFactory.getPairing(curveParams);
-//    }
 }

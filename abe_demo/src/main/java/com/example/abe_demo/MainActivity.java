@@ -13,6 +13,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.abe_demo.abe_tools.ABEFactory;
 import com.example.abe_demo.abe_tools.AccessTree;
 import com.example.abe_demo.abe_tools.CP_ABE;
 import com.example.abe_demo.abe_tools.Node;
@@ -276,12 +277,16 @@ public class MainActivity extends AppCompatActivity {
 
     private  void betterTest() throws Exception{
         // 生成椭圆曲线群
-        int rBits = 160;
-        int qBits = 512;
-        TypeACurveGenerator pg = new TypeACurveGenerator(rBits, qBits);
-        PairingParameters pp = pg.generate();
-        Log.v("log003", pp.toString());
-        Pairing bp = PairingFactory.getPairing(pp);
+//        int rBits = 160;
+//        int qBits = 512;
+//        TypeACurveGenerator pg = new TypeACurveGenerator(rBits, qBits);
+//        PairingParameters pp = pg.generate();
+//        Log.v("log003", pp.toString());
+//        Pairing bp = PairingFactory.getPairing(pp);
+
+        ABEFactory abeFactory = new ABEFactory(this);
+        Pairing bp = abeFactory.initBp();
+
 
         InputStream raw = getResources().openRawResource(R.raw.a);
         PropertiesParameters curveParams = new PropertiesParameters();
