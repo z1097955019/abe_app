@@ -198,13 +198,15 @@ public class DefinedActivity extends Activity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        Snackbar.make(getWindow().getDecorView(),data.toString(),Snackbar.LENGTH_SHORT).show();
         super.onActivityResult(requestCode, resultCode, data);
+//        System.out.println("log009:?????????");
+//        Snackbar.make(getWindow().getDecorView(),data.toString(),Snackbar.LENGTH_SHORT).show();
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             try {
                 Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), data.getData());
                 HmsScan[] hmsScans = ScanUtil.decodeWithBitmap(DefinedActivity.this, bitmap, new HmsScanAnalyzerOptions.Creator().setPhotoMode(true).create());
                 if (hmsScans != null && hmsScans.length > 0 && hmsScans[0] != null && !TextUtils.isEmpty(hmsScans[0].getOriginalValue())) {
+//                    System.out.println("log009:"+ hmsScans.toString());
                     Intent intent = new Intent();
                     intent.putExtra(SCAN_RESULT, hmsScans[0]);
                     setResult(RESULT_OK, intent);

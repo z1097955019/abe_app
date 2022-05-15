@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.abe_demo.R;
+import com.example.abe_demo.abe_tools.ABEFactory;
 import com.example.abe_demo.abe_tools.AccessTree;
 import com.example.abe_demo.abe_tools.CP_ABE;
 import com.example.abe_demo.abe_tools.Node;
@@ -68,6 +69,7 @@ public class DecryptActionFragment extends Fragment {
     private Properties ct2Prop;
     private Properties skProp;
     private Properties clearTextProp;
+    private ABEFactory abeFactory;
 
     public DecryptActionFragment() {
         // Required empty public constructor
@@ -94,10 +96,6 @@ public class DecryptActionFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
@@ -110,6 +108,9 @@ public class DecryptActionFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        abeFactory = new ABEFactory(requireActivity());
+
         btn_run_decrypt = view.findViewById(R.id.btn_run_decrypt);
         tv_show_decrypt_needed_sk = view.findViewById(R.id.tv_show_decrypt_needed_sk);
         tv_show_decrypt_needed_ct = view.findViewById(R.id.tv_show_decrypt_needed_ct);
@@ -118,7 +119,8 @@ public class DecryptActionFragment extends Fragment {
         btn_run_decrypt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                decrypt();
+                abeFactory.decrypt();
+                initData();
             }
         });
 
@@ -126,9 +128,11 @@ public class DecryptActionFragment extends Fragment {
     }
 
     private void initData() {
-        ct1Prop = getData("show_" + ctFileName1);
-        ct2Prop = getData("show_" + ctFileName2);
-        skProp = getData("show_" + skFileName);
+        System.out.println("log012: 这里初始化decrypt的数据了");
+
+        ct1Prop = abeFactory.getData("show_" + ctFileName1);
+        ct2Prop = abeFactory.getData("show_" + ctFileName2);
+        skProp = abeFactory.getData("show_" + skFileName);
 
 
         // 展示用户密钥
@@ -145,109 +149,107 @@ public class DecryptActionFragment extends Fragment {
         }
 
         // 展示明文
-        clearTextProp = getData("show_" + mingFileName);
+        clearTextProp = abeFactory.getData("show_" + mingFileName);
         if (!clearTextProp.isEmpty()) {
             tv_show_decrypt_ming.setText(clearTextProp.toString());
         }
 
     }
 
-    private void decrypt() {
-        // 生成椭圆曲线群
-        Pairing bp = initBp();
-
-        // 初始化数据
-        ct1Prop = getData("show_" + ctFileName1);
-        ct2Prop = getData("show_" + ctFileName2);
-        skProp = getData("show_" + skFileName);
-
-        Map<Integer, String> structMes = new HashMap<>();
-        structMes.put(1, "test1");
-        structMes.put(2, "test2");
-        structMes.put(3, "test3");
-
-
-        Node[] nodes = new Node[7];
-        nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
-        nodes[1] = new Node(1, "idForRoad");
-        nodes[2] = new Node(2, new int[]{1, 2}, new int[]{3, 4}, 2);
-        nodes[3] = new Node(3, "idForSender");
-        nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
-        nodes[5] = new Node(5, "InvitorId");
-        nodes[6] = new Node(6, requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE).getString("nameAndPhoneAndId", ""));
-
-        AccessTree accessTree = new AccessTree(nodes, bp);
-
-        // 存储解密信息
-        List<String> messageBigNumStringGroup = new LinkedList<>();
-
-        // 解密部分
-        List<Element> res = CP_ABE.Decrypt(bp, accessTree, ct1Prop, ct2Prop, skProp, true);
-
-        // 转译展示解密的明文
-        if (!(res == null)) {
-            for (Element bigNum : res) {
-                messageBigNumStringGroup.add(bigNum.toString().substring(1, bigNum.toString().length() - 1).split(",")[0].substring(2));
-            }
-            String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
-
-            // 存储
-            clearTextProp.put("clearText", resString);
-            if (recordData(clearTextProp, "show_" + mingFileName)) {
-                // 展示
-                tv_show_decrypt_ming.setText(resString);
-                Toast.makeText(getActivity(), "解密成功", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(getActivity(), "解密失败", Toast.LENGTH_SHORT).show();
-            }
-
-
-        }
-    }
-
-
-    private Properties getData(String SPName) {
-        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-        Properties prop = new Properties();
-        for (String key : SP.getAll().keySet()) {
-            if (!SP.getString(key, "").equals("")) {
-                prop.put(key, SP.getString(key, ""));
-            }
-        }
-        return prop;
-    }
-
-
-    private Pairing initBp() {
-        // 生成椭圆曲线群
-        InputStream raw = getResources().openRawResource(R.raw.a);
-        PropertiesParameters curveParams = new PropertiesParameters();
-        curveParams.load(raw);
-//        Log.v("log004: curveParams: ", curveParams.toString());
-        return PairingFactory.getPairing(curveParams);
-    }
-
-    private boolean recordData(Properties temPro, String SPName) {
-        try {
-            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-            for (String property_key : temPro.stringPropertyNames()) {
-                editor.putString(property_key, temPro.getProperty(property_key));
-            }
-            editor.commit();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    public Properties load(String propertiesString) {
-        Properties properties = new Properties();
-        try {
-            properties.load(new ByteArrayInputStream(propertiesString.getBytes()));
-        } catch (IOException e) {
-            System.out.println("?????");
-        }
-        return properties;
-    }
+//    private void decrypt() {
+//        // 生成椭圆曲线群
+//        Pairing bp = initBp();
+//
+//        // 初始化数据
+//        ct1Prop = getData("show_" + ctFileName1);
+//        ct2Prop = getData("show_" + ctFileName2);
+//        skProp = getData("show_" + skFileName);
+//
+//        Map<Integer, String> structMes = new HashMap<>();
+//        structMes.put(1, "test1");
+//        structMes.put(2, "test2");
+//        structMes.put(3, "test3");
+//
+//
+//        Node[] nodes = new Node[7];
+//        nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
+//        nodes[1] = new Node(1, "idForRoad");
+//        nodes[2] = new Node(2, new int[]{1, 2}, new int[]{3, 4}, 2);
+//        nodes[3] = new Node(3, "idForSender");
+//        nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
+//        nodes[5] = new Node(5, "InvitorId");
+//        nodes[6] = new Node(6, requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE).getString("nameAndPhoneAndId", ""));
+//
+//        AccessTree accessTree = new AccessTree(nodes, bp);
+//
+//        // 存储解密信息
+//        List<String> messageBigNumStringGroup = new LinkedList<>();
+//
+//        // 解密部分
+//        List<Element> res = CP_ABE.Decrypt(bp, accessTree, ct1Prop, ct2Prop, skProp, true);
+//
+//        // 转译展示解密的明文
+//        if (!(res == null)) {
+//            for (Element bigNum : res) {
+//                messageBigNumStringGroup.add(bigNum.toString().substring(1, bigNum.toString().length() - 1).split(",")[0].substring(2));
+//            }
+//            String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
+//
+//            // 存储
+//            clearTextProp.put("clearText", resString);
+//            if (recordData(clearTextProp, "show_" + mingFileName)) {
+//                // 展示
+////                tv_show_decrypt_ming.setText(resString);
+//                Toast.makeText(getActivity(), "解密成功", Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(getActivity(), "解密失败", Toast.LENGTH_SHORT).show();
+//            }
+//        }
+//    }
+//
+//
+//    private Properties getData(String SPName) {
+//        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+//        Properties prop = new Properties();
+//        for (String key : SP.getAll().keySet()) {
+//            if (!SP.getString(key, "").equals("")) {
+//                prop.put(key, SP.getString(key, ""));
+//            }
+//        }
+//        return prop;
+//    }
+//
+//
+//    private Pairing initBp() {
+//        // 生成椭圆曲线群
+//        InputStream raw = getResources().openRawResource(R.raw.a);
+//        PropertiesParameters curveParams = new PropertiesParameters();
+//        curveParams.load(raw);
+////        Log.v("log004: curveParams: ", curveParams.toString());
+//        return PairingFactory.getPairing(curveParams);
+//    }
+//
+//    private boolean recordData(Properties temPro, String SPName) {
+//        try {
+//            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+//            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+//            for (String property_key : temPro.stringPropertyNames()) {
+//                editor.putString(property_key, temPro.getProperty(property_key));
+//            }
+//            editor.commit();
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
+//
+//    public Properties load(String propertiesString) {
+//        Properties properties = new Properties();
+//        try {
+//            properties.load(new ByteArrayInputStream(propertiesString.getBytes()));
+//        } catch (IOException e) {
+//            System.out.println("?????");
+//        }
+//        return properties;
+//    }
 }

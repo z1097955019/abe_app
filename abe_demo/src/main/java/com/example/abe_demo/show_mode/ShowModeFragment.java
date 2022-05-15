@@ -1,6 +1,8 @@
 package com.example.abe_demo.show_mode;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -161,9 +163,12 @@ public class ShowModeFragment extends Fragment {
         KeygenFragment keygenFragment  = KeygenFragment.newInstance("这是部署1的页面", "");
         EncryptFragment encryptFragment = EncryptFragment.newInstance("这是部署2的页面", "");
         DecryptFragment decryptFragment = DecryptFragment.newInstance("这是部署3的页面", "");
+
         myFragmentList.add(setupFragment);
         myFragmentList.add(keygenFragment);
         myFragmentList.add(encryptFragment);
         myFragmentList.add(decryptFragment);
+
+
     }
 }

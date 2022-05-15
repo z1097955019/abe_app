@@ -455,7 +455,7 @@ public class CP_ABE {
             }
             return afterC;
         } else {
-            System.out.println("No access tree is satisfied.");
+            System.out.println("log001: No access tree is satisfied.");
             return null;
         }
     }

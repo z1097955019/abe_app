@@ -16,6 +16,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.abe_demo.R;
+import com.example.abe_demo.abe_tools.ABEFactory;
 import com.example.abe_demo.abe_tools.CP_ABE;
 
 import java.io.InputStream;
@@ -52,6 +53,7 @@ public class SetupActionFragment extends Fragment {
     private TextView tv_pk;
     private TextView tv_msk;
     private Button btn_run;
+    private ABEFactory abeFactory;
 
     public SetupActionFragment() {
         // Required empty public constructor
@@ -94,13 +96,17 @@ public class SetupActionFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        abeFactory = new ABEFactory(getActivity());
+
         tv_pk = view.findViewById(R.id.tv_show_setup_pk);
         tv_msk = view.findViewById(R.id.tv_show_setup_msk);
         btn_run = view.findViewById(R.id.btn_run_setup);
         btn_run.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setup();
+                abeFactory.setup();
+                initData();
             }
         });
 
@@ -110,8 +116,9 @@ public class SetupActionFragment extends Fragment {
 
     private void initData() {
         // 初始化pk, msk
-        Properties pkProp = getData("show_" + pkFileName);
-        Properties mskProp = getData("show_" + mskFileName);
+        System.out.println("log012: 这里初始化setup的数据了");
+        Properties pkProp = abeFactory.getData("show_" + pkFileName);
+        Properties mskProp = abeFactory.getData("show_" + mskFileName);
 
         if (!pkProp.isEmpty()) {
             tv_pk.setText(pkProp.toString());
@@ -123,64 +130,66 @@ public class SetupActionFragment extends Fragment {
     }
 
 
-    private void setup() {
-        // 生成椭圆曲线群
-        Pairing bp = initBp();
-
-        // 生成参数
-        Map<String, Properties> pkAndMsk = CP_ABE.setup(bp);
-
-        // 写入文件
-        try {
-            for (String key : pkAndMsk.keySet()) {
-                if (pkAndMsk.get(key) != null) {
-                    if (recordData(pkAndMsk.get(key), "show_" + key)) {
-                        Toast.makeText(getActivity(), "初始化公共参数成功！", Toast.LENGTH_SHORT).show();
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "初始化公共参数失败！", Toast.LENGTH_SHORT).show();
-                    break;
-                }
-            }
-            initData();
-        } catch (Exception e) {
-            Toast.makeText(getActivity(), "初始化公共参数失败！", Toast.LENGTH_SHORT).show();
-        }
 
 
-    }
-
-    private boolean recordData(Properties temPro, String SPName) {
-        try {
-            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-            for (String property_key : temPro.stringPropertyNames()) {
-                editor.putString(property_key, temPro.getProperty(property_key));
-            }
-            editor.commit();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    private Pairing initBp() {
-        // 生成椭圆曲线群
-        InputStream raw = getResources().openRawResource(R.raw.a);
-        PropertiesParameters curveParams = new PropertiesParameters();
-        curveParams.load(raw);
-//        Log.v("log004: curveParams: ", curveParams.toString());
-        return PairingFactory.getPairing(curveParams);
-    }
-
-    private Properties getData(String SPName) {
-        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-        Properties prop = new Properties();
-        for (String key : SP.getAll().keySet()) {
-            if (!SP.getString(key, "").equals("")) {
-                prop.put(key, SP.getString(key, ""));
-            }
-        }
-        return prop;
-    }
+//    private void setup() {
+//        // 生成椭圆曲线群
+//        Pairing bp = initBp();
+//
+//        // 生成参数
+//        Map<String, Properties> pkAndMsk = CP_ABE.setup(bp);
+//
+//        // 写入文件
+//        try {
+//            for (String key : pkAndMsk.keySet()) {
+//                if (pkAndMsk.get(key) != null) {
+//                    if (recordData(pkAndMsk.get(key), "show_" + key)) {
+//                        Toast.makeText(getActivity(), "初始化公共参数成功！", Toast.LENGTH_SHORT).show();
+//                    }
+//                } else {
+//                    Toast.makeText(getActivity(), "初始化公共参数失败！", Toast.LENGTH_SHORT).show();
+//                    break;
+//                }
+//            }
+//
+//        } catch (Exception e) {
+//            Toast.makeText(getActivity(), "初始化公共参数失败！", Toast.LENGTH_SHORT).show();
+//        }
+//
+//
+//    }
+//
+//    private boolean recordData(Properties temPro, String SPName) {
+//        try {
+//            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+//            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+//            for (String property_key : temPro.stringPropertyNames()) {
+//                editor.putString(property_key, temPro.getProperty(property_key));
+//            }
+//            editor.commit();
+//            return true;
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
+//
+//    private Pairing initBp() {
+//        // 生成椭圆曲线群
+//        InputStream raw = getResources().openRawResource(R.raw.a);
+//        PropertiesParameters curveParams = new PropertiesParameters();
+//        curveParams.load(raw);
+////        Log.v("log004: curveParams: ", curveParams.toString());
+//        return PairingFactory.getPairing(curveParams);
+//    }
+//
+//    private Properties getData(String SPName) {
+//        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+//        Properties prop = new Properties();
+//        for (String key : SP.getAll().keySet()) {
+//            if (!SP.getString(key, "").equals("")) {
+//                prop.put(key, SP.getString(key, ""));
+//            }
+//        }
+//        return prop;
+//    }
 }

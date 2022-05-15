@@ -104,7 +104,7 @@ public class ModeAccessTreeFragment extends Fragment {
 
         SharedPreferences spRecord = requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE);
         String name = spRecord.getString("name", "name");
-        String phone = spRecord.getString("phone", "phone");
+        String phone = spRecord.getString("phone", "13204164167");
         String id = spRecord.getString("id", "id");
 
 
