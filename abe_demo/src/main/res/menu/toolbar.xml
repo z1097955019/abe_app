@@ -11,9 +11,4 @@
         android:icon="@drawable/access_tree"
         android:title="访问树"
         app:showAsAction="ifRoom"/>
-    <item
-        android:id="@+id/scan_qr_code3"
-        android:icon="@drawable/qr_code_scanner"
-        android:title="其它"
-        app:showAsAction="never"/>
 </menu>

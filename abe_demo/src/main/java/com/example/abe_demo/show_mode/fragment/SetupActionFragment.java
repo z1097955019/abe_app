@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,14 +18,8 @@ import androidx.fragment.app.Fragment;
 import com.example.abe_demo.R;
 import com.example.abe_demo.abe_tools.CP_ABE;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 
 import it.unisa.dia.gas.jpbc.Pairing;
@@ -39,6 +32,13 @@ import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
  * create an instance of this fragment.
  */
 public class SetupActionFragment extends Fragment {
+
+    // 文件存储路径
+    private final String pkFileName = "pk.properties";
+    private final String mskFileName = "msk.properties";
+    private final String skFileName = "sk.properties";
+    private final String ctFileName1 = "ct1.properties";
+    private final String ctFileName2 = "ct2.properties";
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -103,45 +103,63 @@ public class SetupActionFragment extends Fragment {
                 setup();
             }
         });
+
+        // 初始化原始数据
+        initData();
     }
+
+    private void initData() {
+        // 初始化pk, msk
+        Properties pkProp = getData("show_" + pkFileName);
+        Properties mskProp = getData("show_" + mskFileName);
+
+        if (!pkProp.isEmpty()) {
+            tv_pk.setText(pkProp.toString());
+        }
+        if (!mskProp.isEmpty()) {
+            tv_msk.setText(mskProp.toString());
+        }
+
+    }
+
 
     private void setup() {
         // 生成椭圆曲线群
         Pairing bp = initBp();
 
-        // 文件存储路径
-        String pkFileName = "pk.properties";
-        String mskFileName = "msk.properties";
-
         // 生成参数
         Map<String, Properties> pkAndMsk = CP_ABE.setup(bp);
 
-        // 设置显示
-        tv_pk.setText(Objects.requireNonNull(pkAndMsk.get(pkFileName)).toString());
-        tv_msk.setText(Objects.requireNonNull(pkAndMsk.get(mskFileName)).toString());
-
         // 写入文件
-        for (String key : pkAndMsk.keySet()) {
-            if( pkAndMsk.get(key) !=null){
-                if(recordData(pkAndMsk.get(key), "show_"+key)){
-                    Toast.makeText(getActivity(),"初始化公共参数成功！",Toast.LENGTH_SHORT).show();
+        try {
+            for (String key : pkAndMsk.keySet()) {
+                if (pkAndMsk.get(key) != null) {
+                    if (recordData(pkAndMsk.get(key), "show_" + key)) {
+                        Toast.makeText(getActivity(), "初始化公共参数成功！", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(getActivity(), "初始化公共参数失败！", Toast.LENGTH_SHORT).show();
+                    break;
                 }
-            }else{
-                break;
             }
+            initData();
+        } catch (Exception e) {
+            Toast.makeText(getActivity(), "初始化公共参数失败！", Toast.LENGTH_SHORT).show();
         }
+
+
     }
 
     private boolean recordData(Properties temPro, String SPName) {
         try {
             SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
             @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-            for (String property_key : temPro.stringPropertyNames()){
+            for (String property_key : temPro.stringPropertyNames()) {
                 editor.putString(property_key, temPro.getProperty(property_key));
             }
-            editor.apply();
+            editor.commit();
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
@@ -153,5 +171,16 @@ public class SetupActionFragment extends Fragment {
         curveParams.load(raw);
 //        Log.v("log004: curveParams: ", curveParams.toString());
         return PairingFactory.getPairing(curveParams);
+    }
+
+    private Properties getData(String SPName) {
+        SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+        Properties prop = new Properties();
+        for (String key : SP.getAll().keySet()) {
+            if (!SP.getString(key, "").equals("")) {
+                prop.put(key, SP.getString(key, ""));
+            }
+        }
+        return prop;
     }
 }

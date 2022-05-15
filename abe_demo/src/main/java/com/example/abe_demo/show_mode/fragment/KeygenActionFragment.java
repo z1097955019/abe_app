@@ -4,12 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,29 +11,19 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.abe_demo.R;
-import com.example.abe_demo.abe_tools.AccessTree;
-import com.example.abe_demo.abe_tools.CP_ABE;
-import com.example.abe_demo.abe_tools.Node;
-import com.google.android.material.snackbar.Snackbar;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
 
-import java.io.ByteArrayOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import com.example.abe_demo.R;
+import com.example.abe_demo.abe_tools.CP_ABE;
+
 import java.io.InputStream;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 
 import it.unisa.dia.gas.jpbc.Pairing;
-import it.unisa.dia.gas.jpbc.PairingParameters;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
-import it.unisa.dia.gas.plaf.jpbc.pairing.a.TypeACurveGenerator;
 import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
 
 /**
@@ -62,6 +46,16 @@ public class KeygenActionFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private Properties pkProp;
+    private Properties mskProp;
+
+    // 文件存储路径
+    private final String pkFileName = "pk.properties";
+    private final String mskFileName = "msk.properties";
+    private final String skFileName = "sk.properties";
+    private final String ctFileName1 = "ct1.properties";
+    private final String ctFileName2 = "ct2.properties";
+
 
     public KeygenActionFragment() {
         // Required empty public constructor
@@ -107,7 +101,7 @@ public class KeygenActionFragment extends Fragment {
         btn_run_keygen = view.findViewById(R.id.btn_run_keygen);
         tv_show_keygen_needed_pk = view.findViewById(R.id.tv_show_keygen_needed_pk);
         tv_show_keygen_needed_msk = view.findViewById(R.id.tv_show_keygen_needed_msk);
-        tv_show_keygen_sk =view.findViewById(R.id.tv_show_keygen_sk);
+        tv_show_keygen_sk = view.findViewById(R.id.tv_show_keygen_sk);
 
         btn_run_keygen.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -115,16 +109,34 @@ public class KeygenActionFragment extends Fragment {
                 keygen();
             }
         });
+
+        // 初始化原始数据
+        initData();
     }
 
-    private void keygen(){
-        // 生成椭圆曲线群
-        Pairing bp =initBp() ;
+    private void initData() {
+        // 初始化pk, msk
+        pkProp = getData("show_" + pkFileName);
+        mskProp = getData("show_" + mskFileName);
+        Properties sk = getData("show_" + skFileName);
+        if (!pkProp.isEmpty()) {
+            tv_show_keygen_needed_pk.setText(pkProp.toString());
+        }
+        if (!mskProp.isEmpty()) {
+            tv_show_keygen_needed_msk.setText(mskProp.toString());
+        }
+        if (!sk.isEmpty()) {
+            tv_show_keygen_sk.setText(sk.toString());
+        }
+    }
 
-        // 文件存储路径
-        String pkFileName = "pk.properties";
-        String mskFileName = "msk.properties";
-        String skFileName = "sk.properties";
+    private void keygen() {
+        // 生成椭圆曲线群
+        Pairing bp = initBp();
+
+        // 初始化相关参数
+        pkProp = getData("show_" + pkFileName);
+        mskProp = getData("show_" + mskFileName);
 
         // 获取用户相关信息
         SharedPreferences personal_mes = requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE);
@@ -132,16 +144,10 @@ public class KeygenActionFragment extends Fragment {
         // 用户拥有的属性表
         String[] userAttList = {personal_mes.getString("nameAndPhoneAndId", "")};
 
-        // 初始化pk, msk
-        Properties pkProp = getData("show_" + pkFileName);
-        Properties mskProp = getData("show_" + mskFileName);
-
-        tv_show_keygen_needed_pk.setText(pkProp.toString());
-        tv_show_keygen_needed_msk.setText(mskProp.toString());
 
         // 根据用户属性生成sk
         Properties sk = new Properties();
-        try{
+        try {
             sk = CP_ABE.keygen(bp, userAttList, pkProp, mskProp);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -151,18 +157,18 @@ public class KeygenActionFragment extends Fragment {
         tv_show_keygen_sk.setText(sk.toString());
 
         // 存入sp
-        if(recordData(sk, "show_"+skFileName)){
+        if (recordData(sk, "show_" + skFileName)) {
             Toast.makeText(getActivity(), "生成密钥成功！", Toast.LENGTH_SHORT).show();
-        }else {
+        } else {
             Toast.makeText(getActivity(), "生成密钥失败！", Toast.LENGTH_SHORT).show();
         }
     }
 
     private Properties getData(String SPName) {
         SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-        Properties prop =new Properties() ;
-        for(String key :SP.getAll().keySet()){
-            if(!SP.getString(key, "").equals("")){
+        Properties prop = new Properties();
+        for (String key : SP.getAll().keySet()) {
+            if (!SP.getString(key, "").equals("")) {
                 prop.put(key, SP.getString(key, ""));
             }
         }
@@ -173,16 +179,15 @@ public class KeygenActionFragment extends Fragment {
         try {
             SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
             @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
-            for (String property_key : temPro.stringPropertyNames()){
+            for (String property_key : temPro.stringPropertyNames()) {
                 editor.putString(property_key, temPro.getProperty(property_key));
             }
-            editor.apply();
+            editor.commit();
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
     }
-
 
 
     private Pairing initBp() {

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -14,119 +15,149 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/tv_show1"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/introduce_for_decrypt" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="right"
-                android:orientation="vertical"
-                tools:ignore="RtlHardcoded">
-                <Button
-                    android:layout_marginRight="20dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="40dp"
-                    android:id="@+id/btn_run_decrypt"
-                    android:textSize="11sp"
-                    android:text="@string/btn_run_decrypt"
-                    android:gravity="right"
-                    />
-
-            </LinearLayout>
-
-
-            <TextView
-                android:layout_width="match_parent"
                 android:layout_margin="10dp"
-                android:layout_height="1dp"
-                android:background="@color/md_theme_light_primary"
-                android:padding="15dp"/>
+                app:cardBackgroundColor="@color/cardview_light_background"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="5dp"
+                app:strokeWidth="0dp">
 
-            <TextView
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="15dp">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/decrypt_introduce_title"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+
+
+                    <TextView
+                        android:id="@+id/tv_show1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:text="@string/introduce_for_decrypt"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="right"
+                        android:orientation="vertical"
+                        tools:ignore="RtlHardcoded">
+
+                        <Button
+                            android:id="@+id/btn_run_decrypt"
+                            android:layout_width="wrap_content"
+                            android:layout_height="40dp"
+                            android:gravity="center"
+                            android:text="@string/btn_run_decrypt"
+                            android:textSize="11sp" />
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/decrypt_need" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/decrypt_needed_sk"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/tv_show_decrypt_needed_sk"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/decrypt_needed_ct"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/tv_show_decrypt_needed_ct"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp" />
-
-            <TextView
-                android:layout_width="match_parent"
                 android:layout_margin="10dp"
-                android:layout_height="1dp"
-                android:background="@color/md_theme_light_primary"
-                android:padding="15dp"/>
+                app:cardBackgroundColor="@color/cardview_light_background"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="5dp"
+                app:strokeWidth="0dp">
 
-            <TextView
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="15dp">
+
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/decrypt_need"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium"  />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:text="@string/decrypt_needed_sk"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+                    <TextView
+                        android:id="@+id/tv_show_decrypt_needed_sk"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:text="@string/decrypt_needed_ct"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
+
+                    <TextView
+                        android:id="@+id/tv_show_decrypt_needed_ct"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall" />
+
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/decrypt_given" />
+                android:layout_margin="10dp"
+                app:cardBackgroundColor="@color/cardview_light_background"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="5dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="15dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/decrypt_given"
+                        android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
 
 
+                    <TextView
+                        android:id="@+id/tv_show2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingTop="10dp"
+                        android:text="@string/mesMing"
+                        android:textAppearance="@style/TextAppearance.Material3.BodyMedium" />
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/tv_show2"
-                android:paddingTop="15dp"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/mesMing" />
+                    <TextView
+                        android:id="@+id/tv_show_decrypt_ming"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/waiting_init"
+                        android:textAppearance="@style/TextAppearance.Material3.BodySmall"/>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/tv_show_decrypt_ming"
-                android:paddingLeft="15dp"
-                android:paddingRight="15dp"
-                android:textSize="15sp"
-                android:text="@string/waiting_init" />
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
 
 
         </LinearLayout>

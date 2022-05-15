@@ -2,16 +2,15 @@ package com.example.abe_demo.home;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
-import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -32,7 +31,6 @@ import com.huawei.hms.ml.scan.HmsScan;
 import com.huawei.hms.ml.scan.HmsScanAnalyzerOptions;
 
 import java.util.Objects;
-
 
 
 public class HomeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -74,8 +72,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
 //        toolbar.set
         toolbar.setTitle("");
 //        toolbar.setSubtitle("用于演示属性基加密的算法实现");
-
-
         setShowPage();
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
@@ -109,7 +105,24 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         findViewById(R.id.float_button).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                findViewById(R.id.qa).setVisibility(FrameLayout.INVISIBLE);
+                // 文件存储路径
+                String pkFileName = "pk.properties";
+                String mskFileName = "msk.properties";
+                String skFileName = "sk.properties";
+                String ctFileName1 = "ct1.properties";
+                String ctFileName2 = "ct2.properties";
+                String mingFileName = "ming.properties";
+                String ming_before = "clearTB.properties";
+
+                clearSP(getBaseContext(), "show_" + pkFileName);
+                clearSP(getBaseContext(), "show_" + mskFileName);
+                clearSP(getBaseContext(), "show_" + skFileName);
+                clearSP(getBaseContext(), "show_" + ctFileName1);
+                clearSP(getBaseContext(), "show_" + ctFileName2);
+                clearSP(getBaseContext(), "show_" + mingFileName);
+                clearSP(getBaseContext(), "show_" + ming_before);
+
+                Toast.makeText(getBaseContext(), "已清除数据缓存", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -119,21 +132,22 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     // toolbar 菜单按钮监听类
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.scan_qr_code_btn:
                 loadScanKitBtnClick(findViewById(com.huawei.hms.scankit.R.id.surfaceView));
                 break;
             case R.id.access_tree_btn:
-                Intent intent = new Intent(this,AccessTreeActivity.class);
+                Intent intent = new Intent(this, AccessTreeActivity.class);
                 startActivity(intent);
                 break;
             default:
-                Toast.makeText(this, "?????????",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "?????????", Toast.LENGTH_SHORT).show();
                 break;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    // 加载页面的fragment
     private void setShowPage() {
         ShowModeFragment showModeFragment = new ShowModeFragment();
         getSupportFragmentManager().beginTransaction().replace(R.id.show_mode_fcv, showModeFragment).commit();
@@ -141,10 +155,23 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
 
     }
 
-    private void setShowAccessTree(){
-
+    private void setShowAccessTree() {
     }
 
+    // 手动刷新主页面
+    public void refresh() {
+        onCreate(null);
+    }
+
+    // 清空指定数据缓存
+    public static void clearSP(Context context, String name) {
+        SharedPreferences preferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.apply();
+    }
+
+    // 加入菜单
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar, menu);
@@ -188,8 +215,9 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
 
     /**
      * Call back the permission application result. If the permission application is successful, the barcode scanning view will be displayed.
-     * @param requestCode Permission application code.
-     * @param permissions Permission array.
+     *
+     * @param requestCode   Permission application code.
+     * @param permissions   Permission array.
      * @param grantResults: Permission application result array.
      */
     @Override
@@ -217,7 +245,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
      * Event for receiving the activity result.
      *
      * @param requestCode Request code.
-     * @param resultCode Result code.
+     * @param resultCode  Result code.
      * @param data        Result.
      */
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -236,7 +264,7 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                 startActivity(intent);
             }
             //MultiProcessor & Bitmap
-        }  else if (requestCode == REQUEST_CODE_DEFINE) {
+        } else if (requestCode == REQUEST_CODE_DEFINE) {
             HmsScan obj = data.getParcelableExtra(DefinedActivity.SCAN_RESULT);
             if (obj != null) {
                 Intent intent = new Intent(this, DisPlayActivity.class);

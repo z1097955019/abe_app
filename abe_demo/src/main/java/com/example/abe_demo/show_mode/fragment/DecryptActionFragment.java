@@ -4,12 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,14 +11,17 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+
 import com.example.abe_demo.R;
 import com.example.abe_demo.abe_tools.AccessTree;
 import com.example.abe_demo.abe_tools.CP_ABE;
 import com.example.abe_demo.abe_tools.Node;
 import com.example.abe_demo.abe_tools.utils.CodeConvert;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -35,9 +32,7 @@ import java.util.Properties;
 
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Pairing;
-import it.unisa.dia.gas.jpbc.PairingParameters;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
-import it.unisa.dia.gas.plaf.jpbc.pairing.a.TypeACurveGenerator;
 import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
 
 /**
@@ -46,6 +41,14 @@ import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
  * create an instance of this fragment.
  */
 public class DecryptActionFragment extends Fragment {
+
+    // 文件存储路径
+    private final String pkFileName = "pk.properties";
+    private final String mskFileName = "msk.properties";
+    private final String skFileName = "sk.properties";
+    private final String ctFileName1 = "ct1.properties";
+    private final String ctFileName2 = "ct2.properties";
+    private final String mingFileName = "ming.properties";
 
     private Button btn_run_decrypt;
     private TextView tv_show_decrypt_needed_sk;
@@ -61,6 +64,10 @@ public class DecryptActionFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+    private Properties ct1Prop;
+    private Properties ct2Prop;
+    private Properties skProp;
+    private Properties clearTextProp;
 
     public DecryptActionFragment() {
         // Required empty public constructor
@@ -100,38 +107,13 @@ public class DecryptActionFragment extends Fragment {
         return inflater.inflate(R.layout.fragment_decrypt_action, container, false);
     }
 
-    private void writeFile(Properties prop, String FileName) {
-        try {
-            FileOutputStream fos = requireActivity().openFileOutput(FileName, Context.MODE_PRIVATE);
-            prop.store(fos, null);
-//            Toast.makeText(this, FileName + "保存成功", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-//            Toast.makeText(this, FileName+"保存失败", Toast.LENGTH_SHORT).show();
-            e.printStackTrace();
-        }
-    }
-
-    private Properties readFile(String FileName, boolean needProp) {
-        try {
-            Properties prop = new Properties();
-            FileInputStream fis = requireActivity().openFileInput(FileName);
-            prop.load(fis);
-//            Toast.makeText(this, FileName + "读取成功", Toast.LENGTH_SHORT).show();
-            return prop;
-        } catch (IOException e) {
-            e.printStackTrace();
-//            Toast.makeText(this, FileName + "读取失败", Toast.LENGTH_SHORT).show();
-            return new Properties();
-        }
-    }
-
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         btn_run_decrypt = view.findViewById(R.id.btn_run_decrypt);
         tv_show_decrypt_needed_sk = view.findViewById(R.id.tv_show_decrypt_needed_sk);
         tv_show_decrypt_needed_ct = view.findViewById(R.id.tv_show_decrypt_needed_ct);
-        tv_show_decrypt_ming =view.findViewById(R.id.tv_show_decrypt_ming);
+        tv_show_decrypt_ming = view.findViewById(R.id.tv_show_decrypt_ming);
 
         btn_run_decrypt.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,25 +121,51 @@ public class DecryptActionFragment extends Fragment {
                 decrypt();
             }
         });
+
+        initData();
     }
 
-    private void decrypt(){
+    private void initData() {
+        ct1Prop = getData("show_" + ctFileName1);
+        ct2Prop = getData("show_" + ctFileName2);
+        skProp = getData("show_" + skFileName);
+
+
+        // 展示用户密钥
+        if (!skProp.isEmpty()) {
+            tv_show_decrypt_needed_sk.setText(skProp.toString());
+        }
+
+
+        // 展示密文
+        if (!(ct1Prop.isEmpty() && ct2Prop.isEmpty())){
+            StringBuilder sb = new StringBuilder();
+            sb.append("密文组件ct1:\n").append(ct1Prop.toString()).append("\n\n").append("密文组件ct2:\n").append(ct2Prop);
+            tv_show_decrypt_needed_ct.setText(sb);
+        }
+
+        // 展示明文
+        clearTextProp = getData("show_" + mingFileName);
+        if (!clearTextProp.isEmpty()) {
+            tv_show_decrypt_ming.setText(clearTextProp.toString());
+        }
+
+    }
+
+    private void decrypt() {
         // 生成椭圆曲线群
         Pairing bp = initBp();
 
-        // 文件存储路径
-        String skFileName = "sk.properties";
-        String ctFileName1 = "ct1.properties";
-        String ctFileName2 = "ct2.properties";
-
+        // 初始化数据
+        ct1Prop = getData("show_" + ctFileName1);
+        ct2Prop = getData("show_" + ctFileName2);
+        skProp = getData("show_" + skFileName);
 
         Map<Integer, String> structMes = new HashMap<>();
         structMes.put(1, "test1");
         structMes.put(2, "test2");
         structMes.put(3, "test3");
 
-        // 用户拥有的属性表
-        String[] userAttList = {"name123id"};
 
         Node[] nodes = new Node[7];
         nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
@@ -166,21 +174,9 @@ public class DecryptActionFragment extends Fragment {
         nodes[3] = new Node(3, "idForSender");
         nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
         nodes[5] = new Node(5, "InvitorId");
-        nodes[6] = new Node(6, "name123id");
+        nodes[6] = new Node(6, requireActivity().getSharedPreferences("personal_mes", Context.MODE_PRIVATE).getString("nameAndPhoneAndId", ""));
 
         AccessTree accessTree = new AccessTree(nodes, bp);
-
-        Properties ct1Prop =  getData("show_"+ctFileName1);
-        Properties ct2Prop =  getData("show_"+ctFileName2);
-        Properties skProp =   getData("show_"+skFileName);
-
-        // 展示用户密钥
-        tv_show_decrypt_needed_sk.setText(skProp.toString());
-
-        // 展示密文
-        StringBuilder sb = new StringBuilder();
-        sb.append("密文组件ct1:\n").append(ct1Prop.toString()).append("\n\n").append("密文组件ct2:\n").append(ct2Prop);
-        tv_show_decrypt_needed_ct.setText(sb);
 
         // 存储解密信息
         List<String> messageBigNumStringGroup = new LinkedList<>();
@@ -195,19 +191,26 @@ public class DecryptActionFragment extends Fragment {
             }
             String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
 
-            // 展示
-            tv_show_decrypt_ming.setText(resString);
-//            if (mes.equals(resString)) {
-//                Toast.makeText(getActivity(), "解密成功",Toast.LENGTH_SHORT).show();
-//            }
+            // 存储
+            clearTextProp.put("clearText", resString);
+            if (recordData(clearTextProp, "show_" + mingFileName)) {
+                // 展示
+                tv_show_decrypt_ming.setText(resString);
+                Toast.makeText(getActivity(), "解密成功", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getActivity(), "解密失败", Toast.LENGTH_SHORT).show();
+            }
+
+
         }
     }
 
+
     private Properties getData(String SPName) {
         SharedPreferences SP = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
-        Properties prop =new Properties() ;
-        for(String key :SP.getAll().keySet()){
-            if(!SP.getString(key, "").equals("")){
+        Properties prop = new Properties();
+        for (String key : SP.getAll().keySet()) {
+            if (!SP.getString(key, "").equals("")) {
                 prop.put(key, SP.getString(key, ""));
             }
         }
@@ -222,5 +225,29 @@ public class DecryptActionFragment extends Fragment {
         curveParams.load(raw);
 //        Log.v("log004: curveParams: ", curveParams.toString());
         return PairingFactory.getPairing(curveParams);
+    }
+
+    private boolean recordData(Properties temPro, String SPName) {
+        try {
+            SharedPreferences abe_show = requireActivity().getSharedPreferences(SPName, Context.MODE_PRIVATE);
+            @SuppressLint("CommitPrefEdits") SharedPreferences.Editor editor = abe_show.edit();
+            for (String property_key : temPro.stringPropertyNames()) {
+                editor.putString(property_key, temPro.getProperty(property_key));
+            }
+            editor.commit();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public Properties load(String propertiesString) {
+        Properties properties = new Properties();
+        try {
+            properties.load(new ByteArrayInputStream(propertiesString.getBytes()));
+        } catch (IOException e) {
+            System.out.println("?????");
+        }
+        return properties;
     }
 }

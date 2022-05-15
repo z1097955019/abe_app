@@ -42,7 +42,6 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="我想知道这个到底显示了什么"
                 android:layout_gravity="bottom"
                 android:height="100dp"/>
 
@@ -61,7 +60,8 @@
                 android:layout_marginEnd="15dp"
                 android:layout_marginBottom="100dp"
                 android:contentDescription="TODO"
-                android:src="@drawable/ic_baseline_add_24"
+                android:tint="@color/md_theme_light_onPrimary"
+                android:src="@drawable/ic____clear"
                 app:fabSize="auto" />
 
             <LinearLayout

@@ -14,28 +14,28 @@
     <string name="drawer_close">close</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="introduce_for_setup">在sepup算法运行的阶段，服务器生成了运算参数（包括公钥pk，主密钥msk）</string>
-    <string name="btn_run_setup">运行setup算法</string>
+    <string name="introduce_for_setup">在setup算法运行的阶段，服务器生成了运算参数（包括公钥pk，主密钥msk）</string>
+    <string name="btn_run_setup">setup</string>
     <string name="pk">公钥：</string>
     <string name="msk">主密钥：</string>
-    <string name="setup_need">setup算法所需参数：</string>
+    <string name="setup_need">setup算法所需要的参数</string>
     <string name="nothing">无</string>
-    <string name="setup_given">setup算法生成的参数：</string>
+    <string name="setup_given">setup算法生成的参数</string>
     <string name="waiting_init">（待生成）</string>
     <string name="introduce_for_keygen">为了给用户生成唯一的密钥，密钥生成算法根据服务器存有的额公共参数进行运算，并生成用户密钥。</string>
-    <string name="btn_run_keygen">运行keygrn算法</string>
-    <string name="keygen_need">keygen算法需要的参数</string>
+    <string name="btn_run_keygen">keygen</string>
+    <string name="keygen_need">keygen算法所需要的参数</string>
     <string name="keygen_given">keygen算法生成的参数</string>
     <string name="sk">用户密钥</string>
     <string name="keygen_needed_pk">公钥 pk：</string>
     <string name="keygen_needed_msk">主密钥 msk：</string>
     <string name="introduce_for_encrypt">介绍一下encrypt算法</string>
-    <string name="btn_run_encrypt">运行encrypt算法</string>
+    <string name="btn_run_encrypt">encrypt</string>
     <string name="encrypt_need">encrypt算法需要的参数</string>
     <string name="encrypt_given">encrypt算法生成的参数</string>
     <string name="encrypt_needed_pk">公钥 pk：</string>
     <string name="encrypt_needed_access_tree">访问树结构：</string>
-    <string name="see_access_tree_in_bottom_right">点击平面右下角对应按钮跳转</string>
+    <string name="see_access_tree_in_bottom_right">点击右上角对应按钮跳转</string>
     <string name="introduce_for_decrypt">描述一下decrypt算法</string>
     <string name="btn_run_decrypt">decrypt</string>
     <string name="decrypt_need">decrypt算法所需的参数</string>
@@ -89,7 +89,19 @@
     <string name="mwc_subject">About Scan Kit</string>
     <string name="mwc_detail">An in-app scanner for 1D and 2D barcodes connects your app to real-world scenarios and helps you build powerful code scanning capabilities with a minimum of 5 lines of code.</string>
     <string name="scan_showresult">Scan results will show on screen</string>
+
+
     <string name="accessTree_added_level">加入权限分级后的访问树结构</string>
     <string name="accessTreePrim">原始访问树结构</string>
     <string name="AccessTreeSimplified">简化叶子节点的访问树结构</string>
+    <string name="setup_introduce_title">setup算法简介</string>
+    <string name="keygen_introduce_title">keygen算法简介</string>
+    <string name="encrypt_introduce_title">encrypt算法简介</string>
+    <string name="decrypt_introduce_title">decrypt算法简介</string>
+    <string name="clearTextNeeded">需要加密的明文：</string>
+    <string name="clt1">一级明文内容</string>
+    <string name="clt2">二级明文内容</string>
+    <string name="clt3">三级明文内容</string>
+    <string name="mod">修改</string>
+    <string name="show_qr_code">生成的二维码：</string>
 </resources>

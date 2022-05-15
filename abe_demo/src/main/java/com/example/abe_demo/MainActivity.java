@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -19,7 +18,6 @@ import com.example.abe_demo.abe_tools.CP_ABE;
 import com.example.abe_demo.abe_tools.Node;
 import com.example.abe_demo.abe_tools.utils.CodeConvert;
 import com.example.abe_demo.home.HomeActivity;
-import com.example.abe_demo.show_mode.ShowModeActivity;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -85,7 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     betterTest();
                     tv_show_ct.setText(ct);
                     tv_show_mi.setText(mi);
-                    zxing(ct);
+                    imageView.setImageBitmap(zxing(ct));
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -407,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void zxing(String name){
+    private Bitmap zxing(String name){
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
         Hashtable hints = new Hashtable();
         hints.put(EncodeHintType.ERROR_CORRECTION, ErrorCorrectionLevel.L);
@@ -429,9 +427,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-
-        bit = Bitmap.createBitmap(colors, width, height, Bitmap.Config.RGB_565);
-        imageView.setImageBitmap(bit);
+        return Bitmap.createBitmap(colors, width, height, Bitmap.Config.RGB_565);
     }
 
 }

@@ -27,8 +27,10 @@ import android.view.Window;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.example.abe_demo.R;
+import com.google.android.material.snackbar.Snackbar;
 import com.huawei.hms.hmsscankit.OnLightVisibleCallBack;
 import com.huawei.hms.hmsscankit.OnResultCallback;
 import com.huawei.hms.hmsscankit.RemoteView;
@@ -196,6 +198,7 @@ public class DefinedActivity extends Activity {
      */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        Snackbar.make(getWindow().getDecorView(),data.toString(),Snackbar.LENGTH_SHORT).show();
         super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK && requestCode == REQUEST_CODE_PHOTO) {
             try {
