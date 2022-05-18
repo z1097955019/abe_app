@@ -108,4 +108,18 @@
     <string name="btn_run_keygen_default">keygen (default)</string>
     <string name="btn_run_encrypt_default">encrypt (default)</string>
     <string name="btn_run_decrypt_default">decrypt (default)</string>
+    <string name="province">省份</string>
+    <string name="city">市</string>
+    <string name="地区">place</string>
+    <string name="place">地区</string>
+    <string name="detailAddress">详细地址</string>
+    <string name="receiverName">收件人姓名</string>
+    <string name="receiverMessage">收件人信息</string>
+    <string name="save">保存</string>
+    <string name="receiverAddress">收件人地址：</string>
+    <string name="receiverPhone">收件人电话</string>
+    <string name="receiverNameShow">收件人姓名：</string>
+    <string name="senderMessage">寄件人信息</string>
+    <string name="senderName">寄件人姓名</string>
+    <string name="senderPhoneNumber">寄件人电话</string>
 </resources>

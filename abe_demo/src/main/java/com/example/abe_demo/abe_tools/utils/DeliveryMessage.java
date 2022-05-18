@@ -15,6 +15,9 @@ public class DeliveryMessage {
         this.behindAddress = behindAddress;
     }
 
+    public DeliveryMessage() {
+    }
+
     public String getPersonName() {
         return personName;
     }
