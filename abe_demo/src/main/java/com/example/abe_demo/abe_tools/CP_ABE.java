@@ -28,9 +28,7 @@ public class CP_ABE {
         for (Map.Entry<Integer, String> entry : structMes.entrySet()) {
             int mesLevel = entry.getKey();
             String mes = entry.getValue();
-
-            String ElementStringMes = CodeConvert.mesToBigNum(mes, 29);
-            structElementMes.put(mesLevel, bp.getGT().newElement(new BigInteger(ElementStringMes)));
+            structElementMes.put(mesLevel, bp.getGT().newElement(new BigInteger(mes)));
         }
         return structElementMes;
     }
@@ -53,8 +51,7 @@ public class CP_ABE {
 
                     // 拿到去除随机数r的秘密碎片值
                     node.secretShare = bp.pairing(C1, D0).mul(bp.pairing(C2, Datt)).getImmutable();
-                }
-                else if(Arrays.asList(userAttList).contains(node.attribute) && node.index > 5){
+                } else if (Arrays.asList(userAttList).contains(node.attribute) && node.index > 5) {
                     // 从密文文件中恢复所有叶子节点的C1， C2值
                     Element C1 = FileOperate.loadElementFromProp("C1-" + node.attribute, ctProp2, bp.getG1());
                     Element C2 = FileOperate.loadElementFromProp("C2-" + node.attribute, ctProp2, bp.getG1());
@@ -66,8 +63,7 @@ public class CP_ABE {
 
                     // 拿到去除随机数r的秘密碎片值
                     node.secretShare = bp.pairing(C1, D0).mul(bp.pairing(C2, Datt)).getImmutable();
-                }
-                else {
+                } else {
                     node.secretShare = null;
                 }
             }
@@ -240,6 +236,22 @@ public class CP_ABE {
         return res;
     }
 
+    public static Map<String, Properties> encrypt(Pairing bp, Map<Integer, String> structMes, boolean isDeeplyStructural, AccessTree accessTree, Properties pkProps) throws NoSuchAlgorithmException {
+        if (isDeeplyStructural){
+            return encrypt(bp, structMes, accessTree, pkProps);
+        } else{
+            Map<Integer, String> structElementMes = new HashMap<>();
+            for (Map.Entry<Integer, String> entry : structMes.entrySet()) {
+                int mesLevel = entry.getKey();
+                String mes = entry.getValue();
+
+                String ElementStringMes = CodeConvert.mesToBigNum(mes, 29);
+                structElementMes.put(mesLevel, ElementStringMes);
+            }
+            return encrypt(bp, structElementMes, accessTree, pkProps);
+        }
+    }
+
     public static Map<String, Properties> encrypt(Pairing bp, Map<Integer, String> structMes, AccessTree accessTree, Properties pkProps) throws NoSuchAlgorithmException {
 
         // 从公钥文件中加载生成元g, 一个g_beta, 一个egg_alpha
@@ -393,15 +405,15 @@ public class CP_ABE {
         // 从用户密钥文件中恢复存有alpha， beta， t属性的 D 与单独存储t属性的 D0
         Element D = FileOperate.loadElementFromProp("D", skProp, bp.getG1());
         Element D0 = FileOperate.loadElementFromProp("D0", skProp, bp.getG1());
-        System.out.println("log001  D0_1: "+D0);
+        System.out.println("log001  D0_1: " + D0);
         D0 = FileOperate.loadElementFromProp("D0", skProp, bp.getG1());
-        System.out.println("log001  D0_2: "+D0);
+        System.out.println("log001  D0_2: " + D0);
         D0 = FileOperate.loadElementFromProp("D0", skProp, bp.getG1());
 
-        System.out.println("log001  C0: "+C0);
-        System.out.println("log001  D: "+D);
-        System.out.println("log001  D0: "+D0);
-        System.out.println("log001"+"\n\n");
+        System.out.println("log001  C0: " + C0);
+        System.out.println("log001  D: " + D);
+        System.out.println("log001  D0: " + D0);
+        System.out.println("log001" + "\n\n");
 
 
         Map<Integer, Element> secretShare = new HashMap<>();
@@ -448,7 +460,7 @@ public class CP_ABE {
                 Element thisSecret = singleSecretShare.getValue();
 
                 Element egg_alphas = bp.pairing(C0, D).div(thisSecret);
-                System.out.println("login_egg_alphas"+egg_alphas);
+                System.out.println("login_egg_alphas" + egg_alphas);
 
                 afterC.add(CWithLevel.get(thisLevel).div(egg_alphas));
             }

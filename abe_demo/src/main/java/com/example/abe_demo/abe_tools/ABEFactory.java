@@ -146,7 +146,7 @@ public class ABEFactory {
         encrypt(defaultPkFileName, defaultMing_before);
     }
 
-    public void encrypt(String pkFileName, String ming_before) {
+    public void encrypt(String pkFileName, Map<Integer, String> deeplyStructuralData) {
         // 生成椭圆曲线群
         Pairing bp = initBp();
 
@@ -154,10 +154,6 @@ public class ABEFactory {
         Properties pkProp = getData("show_" + pkFileName);
 
         // 结构化信息存储
-//        Map<Integer, String> structMes = new HashMap<>();
-//        structMes.put(1, "test1");
-//        structMes.put(2, "test2");
-//        structMes.put(3, "test3");
         Map<Integer, String> structMes = getClearTextFromSP("show_" + ming_before);
         if (structMes.isEmpty()) {
             structMes.put(1, "test1");
@@ -181,7 +177,60 @@ public class ABEFactory {
         // 生成加密密文
         Map<String, Properties> ct1AndCt2 = new HashMap<>();
         try {
-            ct1AndCt2 = CP_ABE.encrypt(bp, structMes, accessTree, pkProp);
+            ct1AndCt2 = CP_ABE.encrypt(bp, deeplyStructuralData,true, accessTree, pkProp);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+
+        // 写入ct并展示
+        StringBuilder ctb = new StringBuilder();
+        List<String> ctList = dealCts(ct1AndCt2);
+        for (String ctItem : ctList) {
+            ctb.append(ctItem).append("\n\n");
+        }
+//        imageView.setImageBitmap(zxing(ctList.get(1)));
+
+
+        if (!ctb.toString().equals("")) {
+//            tv_show_encrypt_ct.setText(ctb.toString());
+            Toast.makeText(context, "加密密文生成成功！", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(context, "加密密文生成失败！", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void encrypt(String pkFileName, String ming_before) {
+        // 生成椭圆曲线群
+        Pairing bp = initBp();
+
+        // 初始化pk
+        Properties pkProp = getData("show_" + pkFileName);
+
+        // 结构化信息存储
+        Map<Integer, String> structMes = getClearTextFromSP("show_" + ming_before);
+        if (structMes.isEmpty()) {
+            structMes.put(1, "test1");
+            structMes.put(2, "test2");
+            structMes.put(3, "test3");
+        }
+        System.out.println("log008" + structMes);
+
+        // 访问树结构
+        Node[] nodes = new Node[7];
+        nodes[0] = new Node(0, new int[]{1, 2}, new int[]{1, 2}, 1);
+        nodes[1] = new Node(1, "idForRoad");
+        nodes[2] = new Node(2, new int[]{1, 2}, new int[]{3, 4}, 2);
+        nodes[3] = new Node(3, "idForSender");
+        nodes[4] = new Node(4, new int[]{1, 2}, new int[]{5, 6}, 3);
+        nodes[5] = new Node(5, "InvitorId");
+        nodes[6] = new Node(6, context.getSharedPreferences("personal_mes", Context.MODE_PRIVATE).getString("nameAndPhoneAndId", ""));
+
+        AccessTree accessTree = new AccessTree(nodes, bp);
+
+        // 生成加密密文
+        Map<String, Properties> ct1AndCt2 = new HashMap<>();
+        try {
+            ct1AndCt2 = CP_ABE.encrypt(bp, structMes,false, accessTree, pkProp);
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }

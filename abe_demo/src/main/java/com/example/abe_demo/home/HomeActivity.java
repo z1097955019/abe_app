@@ -9,6 +9,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -17,20 +20,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.ActionBarDrawerToggle;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.fragment.app.Fragment;
 
 import com.example.abe_demo.R;
 import com.example.abe_demo.abe_tools.ABEFactory;
-import com.example.abe_demo.abe_tools.AccessTree;
-import com.example.abe_demo.abe_tools.CP_ABE;
-import com.example.abe_demo.abe_tools.Node;
-import com.example.abe_demo.abe_tools.utils.CodeConvert;
 import com.example.abe_demo.show_mode.ShowModeFragment;
+import com.example.abe_demo.sqlite3.DatabaseHelper;
+import com.example.abe_demo.sqlite3.PlaceInitUtils;
+import com.example.abe_demo.use_mode.UseModeFragment;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.navigation.NavigationView;
@@ -39,21 +41,7 @@ import com.huawei.hms.hmsscankit.ScanUtil;
 import com.huawei.hms.ml.scan.HmsScan;
 import com.huawei.hms.ml.scan.HmsScanAnalyzerOptions;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
-import java.util.Properties;
-
-import it.unisa.dia.gas.jpbc.Element;
-import it.unisa.dia.gas.jpbc.Pairing;
-import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
-import it.unisa.dia.gas.plaf.jpbc.pairing.parameters.PropertiesParameters;
 
 
 public class HomeActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -62,6 +50,20 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private ActionBarDrawerToggle actionBarDrawerToggle;
     private DrawerLayout drawerLayout;
     private NavigationView navigationView;
+    private DatabaseHelper dbHelper;
+    private final Handler mHandler = new Handler(Looper.myLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            if (msg.what == 0) {
+                if ((boolean) msg.obj) {
+                    Toast.makeText(getApplicationContext(), "初始化地区数据成功！", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getApplicationContext(), "初始化地区数据失败！", Toast.LENGTH_SHORT).show();
+                }
+            }
+        }
+    };
 
     public static final int CAMERA_REQ_CODE = 111;
     public static final int DEFINED_CODE = 222;
@@ -70,6 +72,8 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     private static final int REQUEST_CODE_SCAN_ONE = 0X01;
     private static final int REQUEST_CODE_DEFINE = 0X0111;
     public static final String RESULT = "SCAN_RESULT";
+    private ShowModeFragment showModeFragment;
+    private UseModeFragment useModeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +83,6 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
         toolbar = findViewById(R.id.main_toolbar);
         drawerLayout = findViewById(R.id.draw_layout);
         navigationView = findViewById(R.id.main_ng);
-        FloatingActionButton fab = findViewById(R.id.float_button);
-        fab.setBottom(50);
 
         setSupportActionBar(toolbar);
         actionBarDrawerToggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.drawer_open, R.string.drawer_close);
@@ -95,17 +97,21 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
 //        toolbar.set
         toolbar.setTitle("");
 //        toolbar.setSubtitle("用于演示属性基加密的算法实现");
-        setShowPage();
+        showModeFragment = new ShowModeFragment();
+        useModeFragment = new UseModeFragment();
+        setShowPage(showModeFragment, R.id.menu_drawer_show_mode);
 
         navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
             @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
-                    case R.id.menu_home_arrange:
+                    case R.id.menu_drawer_show_mode:
+                        setShowPage(showModeFragment, R.id.menu_drawer_show_mode);
                         Toast.makeText(getApplicationContext(), "menu_home_arrange", Toast.LENGTH_SHORT).show();
                         break;
-                    case R.id.menu_home_keygen:
+                    case R.id.menu_drawer_use_mode:
+                        setShowPage(useModeFragment, R.id.menu_drawer_use_mode);
                         Toast.makeText(getApplicationContext(), "menu_home_keygen", Toast.LENGTH_SHORT).show();
                         break;
                     default:
@@ -118,33 +124,9 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             }
         });
 
-        // 浮动按钮的监听事件
-        findViewById(R.id.float_button).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                // 文件存储路径
-                String pkFileName = "pk.properties";
-                String mskFileName = "msk.properties";
-                String skFileName = "sk.properties";
-                String ctFileName1 = "ct1.properties";
-                String ctFileName2 = "ct2.properties";
-                String mingFileName = "ming.properties";
-                String ming_before = "clearTB.properties";
-
-                clearSP(getBaseContext(), "show_" + pkFileName);
-                clearSP(getBaseContext(), "show_" + mskFileName);
-                clearSP(getBaseContext(), "show_" + skFileName);
-                clearSP(getBaseContext(), "show_" + ctFileName1);
-                clearSP(getBaseContext(), "show_" + ctFileName2);
-                clearSP(getBaseContext(), "show_" + mingFileName);
-                clearSP(getBaseContext(), "show_" + ming_before);
-
-                Toast.makeText(getBaseContext(), "已清除数据缓存", Toast.LENGTH_SHORT).show();
-            }
-        });
-
+        // 初始化未修改过的结构树
         SharedPreferences spRecord = getSharedPreferences("personal_mes", Context.MODE_PRIVATE);
-        if(spRecord.getAll().isEmpty()){
+        if (spRecord.getAll().isEmpty()) {
             System.out.println("log011: 进来了");
             @SuppressLint("CommitPrefEdits") SharedPreferences.Editor edit = spRecord.edit();
             edit.putString("nameAndPhoneAndId", "可爱小刺猬1320416416720220515");
@@ -153,6 +135,32 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
             edit.putString("id", "20220515");
             edit.apply();
         }
+
+        // 初始化地点数据库
+        SharedPreferences spState = getSharedPreferences("state", Context.MODE_PRIVATE);
+        PlaceInitUtils placeInitUtils = new PlaceInitUtils(this);
+        if (spState.getBoolean("dbIsNotInit", true)) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    dbHelper = new DatabaseHelper(getBaseContext(), 1);
+                    Message message = new Message();
+                    message.what = 0;
+                    if (dbHelper.insertProvinceList(placeInitUtils.getProvinceListFromFile(R.raw.province)) &&
+                            dbHelper.insertCityList(placeInitUtils.getCityListFromFile(R.raw.province_under)) &&
+                            dbHelper.insertPlaceList(placeInitUtils.getPlaceCityListFromFile(R.raw.place))) {
+                        spState.edit().putBoolean("dbIsNotInit", false).apply();
+                        message.obj = true;
+                    } else {
+                        message.obj = false;
+                    }
+                    mHandler.sendMessage(message);
+
+                }
+            }).start();
+
+        }
+
     }
 
     // toolbar 菜单按钮监听类
@@ -174,20 +182,11 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
     }
 
     // 加载页面的fragment
-    private void setShowPage() {
-        ShowModeFragment showModeFragment = new ShowModeFragment();
-        getSupportFragmentManager().beginTransaction().replace(R.id.show_mode_fcv, showModeFragment).commit();
-        navigationView.setCheckedItem(R.id.menu_home_arrange);
+    private void setShowPage(Fragment fragment, int navigationViewId) {
+//        ShowModeFragment showModeFragment = new ShowModeFragment();
+        getSupportFragmentManager().beginTransaction().replace(R.id.show_mode_fcv, fragment).commit();
+        navigationView.setCheckedItem(navigationViewId);
 
-    }
-
-
-    // 清空指定数据缓存
-    public static void clearSP(Context context, String name) {
-        SharedPreferences preferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.clear();
-        editor.apply();
     }
 
     // 加入菜单
@@ -283,14 +282,14 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                 ABEFactory abeFactory = new ABEFactory(this);
                 String testStr;
                 try {
-                    testStr = abeFactory.decrypt(qrValue,true);
-                    new MaterialAlertDialogBuilder(this).setTitle("解密结果：").setMessage("原始数据：\n"+qrValue+"\n\n"+ "解密数据：\n"+testStr+"\n\n").setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                    testStr = abeFactory.decrypt(qrValue, true);
+                    new MaterialAlertDialogBuilder(this).setTitle("解密结果：").setMessage("原始数据：\n" + qrValue + "\n\n" + "解密数据：\n" + testStr + "\n\n").setPositiveButton("确认", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                         }
                     }).show();
-                }catch (Exception e){
-                    Snackbar.make(navigationView, e.toString(),Snackbar.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Snackbar.make(navigationView, e.toString(), Snackbar.LENGTH_SHORT).show();
                 }
             }
             //MultiProcessor & Bitmap
@@ -301,16 +300,17 @@ public class HomeActivity extends AppCompatActivity implements ActivityCompat.On
                 ABEFactory abeFactory = new ABEFactory(this);
                 String testStr;
                 try {
-                    testStr = abeFactory.decrypt(qrValue,true);
-                    new MaterialAlertDialogBuilder(this).setTitle("解密结果：").setMessage("原始数据：\n"+qrValue+"\n\n"+ "解密数据：\n"+testStr+"\n\n").setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                    testStr = abeFactory.decrypt(qrValue, true);
+                    new MaterialAlertDialogBuilder(this).setTitle("解密结果：").setMessage("原始数据：\n" + qrValue + "\n\n" + "解密数据：\n" + testStr + "\n\n").setPositiveButton("确认", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                         }
                     }).show();
-                }catch (Exception e){
-                    Snackbar.make(navigationView, e.toString(),Snackbar.LENGTH_SHORT).show();
+                } catch (Exception e) {
+                    Snackbar.make(navigationView, e.toString(), Snackbar.LENGTH_SHORT).show();
                 }
             }
         }
     }
+
 }

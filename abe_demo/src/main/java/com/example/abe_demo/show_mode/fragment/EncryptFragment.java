@@ -100,15 +100,13 @@ public class EncryptFragment extends Fragment {
         labelList = new ArrayList<>();
 
         EncryptActionFragment encryptActionFragment = new EncryptActionFragment().newInstance("这是一个不能睡觉的页面","");
-        EncryptActionFragment  encryptActionFragment1 = new EncryptActionFragment().newInstance("这是一个能睡觉的页面","");
+//        EncryptActionFragment  encryptActionFragment1 = new EncryptActionFragment().newInstance("这是一个能睡觉的页面","");
         EncryptActionFragment  encryptActionFragment2 = new EncryptActionFragment().newInstance("这是一个超能睡觉的页面","");
 
         fragmentList.add(encryptActionFragment);
-        fragmentList.add(encryptActionFragment1);
         fragmentList.add(encryptActionFragment2);
 
         labelList.add("实时生成");
-        labelList.add("默认配置");
         labelList.add("详细说明");
     }
 }

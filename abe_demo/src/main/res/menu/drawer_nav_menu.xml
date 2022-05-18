@@ -3,11 +3,11 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/menu_home_arrange"
+            android:id="@+id/menu_drawer_show_mode"
             android:icon="@drawable/selector_bg_home"
             android:title="演示模式" />
         <item
-            android:id="@+id/menu_home_keygen"
+            android:id="@+id/menu_drawer_use_mode"
             android:icon="@drawable/selector_bg_give_key"
             android:title="模拟实际使用" />
 

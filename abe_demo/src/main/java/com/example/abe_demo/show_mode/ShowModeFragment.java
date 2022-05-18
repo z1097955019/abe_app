@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +24,7 @@ import com.example.abe_demo.show_mode.fragment.EncryptFragment;
 import com.example.abe_demo.show_mode.fragment.KeygenFragment;
 import com.example.abe_demo.show_mode.fragment.SetupFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +47,7 @@ public class ShowModeFragment extends Fragment {
     private BottomNavigationView myBottomNavigationView;
     private List<Fragment> myFragmentList;
     private FVPAdapter fvpAdapter;
-
+    private FloatingActionButton fab;
 
 
     public ShowModeFragment() {
@@ -89,8 +91,11 @@ public class ShowModeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        fab = view.findViewById(R.id.float_button);
+        fab.setBottom(50);
 
         myViewPager = view.findViewById(R.id.vp);
+        myViewPager.setSaveEnabled(false);
         myBottomNavigationView = view.findViewById(R.id.bottom_nav_menu);
 
         initData();
@@ -154,6 +159,31 @@ public class ShowModeFragment extends Fragment {
             }
         });
 
+        // 浮动按钮的监听事件
+        view.findViewById(R.id.float_button).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // 文件存储路径
+                String pkFileName = "pk.properties";
+                String mskFileName = "msk.properties";
+                String skFileName = "sk.properties";
+                String ctFileName1 = "ct1.properties";
+                String ctFileName2 = "ct2.properties";
+                String mingFileName = "ming.properties";
+                String ming_before = "clearTB.properties";
+
+                clearSP(getContext(), "show_" + pkFileName);
+                clearSP(getContext(), "show_" + mskFileName);
+                clearSP(getContext(), "show_" + skFileName);
+                clearSP(getContext(), "show_" + ctFileName1);
+                clearSP(getContext(), "show_" + ctFileName2);
+                clearSP(getContext(), "show_" + mingFileName);
+                clearSP(getContext(), "show_" + ming_before);
+
+                Toast.makeText(getContext(), "已清除数据缓存", Toast.LENGTH_SHORT).show();
+            }
+        });
+
     }
 
 
@@ -170,5 +200,13 @@ public class ShowModeFragment extends Fragment {
         myFragmentList.add(decryptFragment);
 
 
+    }
+
+    // 清空指定数据缓存
+    private static void clearSP(Context context, String name) {
+        SharedPreferences preferences = context.getSharedPreferences(name, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.clear();
+        editor.apply();
     }
 }

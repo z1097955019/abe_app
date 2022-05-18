@@ -100,15 +100,15 @@ public class DecryptFragment extends Fragment {
         labelList = new ArrayList<>();
 
         DecryptActionFragment  decryptActionFragment = new DecryptActionFragment().newInstance("这是一个不能睡觉的页面","");
-        DecryptActionFragment  decryptActionFragment1 = new DecryptActionFragment().newInstance("这是一个能睡觉的页面","");
+//        DecryptActionFragment  decryptActionFragment1 = new DecryptActionFragment().newInstance("这是一个能睡觉的页面","");
         DecryptActionFragment  decryptActionFragment2 = new DecryptActionFragment().newInstance("这是一个超能睡觉的页面","");
 
         fragmentList.add(decryptActionFragment);
-        fragmentList.add(decryptActionFragment1);
+//        fragmentList.add(decryptActionFragment1);
         fragmentList.add(decryptActionFragment2);
 
         labelList.add("实时生成");
-        labelList.add("默认配置");
+//        labelList.add("默认配置");
         labelList.add("详细说明");
     }
 }

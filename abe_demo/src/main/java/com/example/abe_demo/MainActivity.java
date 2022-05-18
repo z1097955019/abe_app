@@ -360,7 +360,7 @@ public class MainActivity extends AppCompatActivity {
 //        }
 
 
-        Map<String, Properties> ct1AndCt2 = CP_ABE.encrypt(bp, structMes, accessTree, pkProp);
+        Map<String, Properties> ct1AndCt2 = CP_ABE.encrypt(bp, structMes, false, accessTree, pkProp);
         Log.v("log", "加密成功！");
 
         Properties test = ct1AndCt2.get(ctFileName2);

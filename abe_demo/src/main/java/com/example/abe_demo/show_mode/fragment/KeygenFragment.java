@@ -104,11 +104,9 @@ public class KeygenFragment extends Fragment {
         KeygenActionFragment  keygenActionFragment2 = new KeygenActionFragment().newInstance("这是一个超能睡觉的页面","");
 
         fragmentList.add(keygenActionFragment);
-        fragmentList.add(keygenActionFragment1);
         fragmentList.add(keygenActionFragment2);
 
         labelList.add("实时生成");
-        labelList.add("默认配置");
         labelList.add("详细说明");
     }
 }
