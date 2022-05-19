@@ -122,4 +122,6 @@
     <string name="senderMessage">寄件人信息</string>
     <string name="senderName">寄件人姓名</string>
     <string name="senderPhoneNumber">寄件人电话</string>
+    <string name="scan_something">扫一扫</string>
+    <string name="generate_something">生成二维码</string>
 </resources>

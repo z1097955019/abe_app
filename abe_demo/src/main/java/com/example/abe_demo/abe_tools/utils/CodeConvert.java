@@ -198,9 +198,15 @@ public class CodeConvert {
     }
 
 
+    public static Map<Integer, String> fromDataToBigNumGroup(Map<String, DeliveryMessage> dataBefore){
+        return StructuralBigNumStringToBigNumGroup(structuralDataToStructuralBigNumString(initData(dataBefore)));
+    }
+
     public static void main(String[] args) {
 
     }
+
+
 
 
 }
