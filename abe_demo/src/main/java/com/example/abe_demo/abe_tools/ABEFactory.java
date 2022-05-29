@@ -314,6 +314,10 @@ public class ABEFactory {
             for (Element bigNum : res) {
                 messageBigNumStringGroup.add(bigNum.toString().substring(1, bigNum.toString().length() - 1).split(",")[0].substring(2));
             }
+            CodeConvert cct = new CodeConvert();
+            CodeConvert.ABECtDecoder abeCtDecoder = cct.new ABECtDecoder(res);
+
+//            String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
             String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
 
             // 存储
@@ -326,7 +330,8 @@ public class ABEFactory {
             } else {
                 Toast.makeText(context, "解密失败", Toast.LENGTH_SHORT).show();
             }
-            return resString;
+//            return resString;
+            return abeCtDecoder.DeliveryDecodeToString();
         }else {
             return "";
         }
