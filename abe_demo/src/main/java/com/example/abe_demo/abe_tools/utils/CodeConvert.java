@@ -284,7 +284,7 @@ public class CodeConvert {
                 senderSb.append(sender.getAheadAddress()).append(sender.getPhoneNumber())
                         .append(sender.getPersonName()).append(sender.getBehindAddress());
             }
-            structuralClearText.put(1, senderSb.toString());
+            structuralClearText.put(3, senderSb.toString());
         } catch (Exception e) {
             System.out.println("error log: " + e);
         }
@@ -297,8 +297,8 @@ public class CodeConvert {
                 receiverSb1.append(receiver.getAheadAddress()).append(receiver.getBehindAddress());
                 receiverSb2.append(receiver.getPhoneNumber()).append(receiver.getPersonName());
             }
-            structuralClearText.put(2, receiverSb1.toString());
-            structuralClearText.put(3, receiverSb2.toString());
+            structuralClearText.put(2, receiverSb2.toString());
+            structuralClearText.put(1, receiverSb1.toString());
         } catch (Exception e) {
             System.out.println("error log: " + e);
         }
@@ -455,7 +455,14 @@ public class CodeConvert {
          * @return the string
          */
         public String ElementToElement_str(Element num) {
-            return (num.toString().substring(1, num.toString().length() - 1).split(",")[0].substring(2));
+            String str = "";
+            try {
+                str = (num.toString().substring(1, num.toString().length() - 1).split(",")[0].substring(2));
+            } catch (Exception e) {
+                System.out.println("log013: cuole" + e.toString());
+            }
+            return str;
+
         }
 
         /**
@@ -473,11 +480,21 @@ public class CodeConvert {
             return element_strGroup;
         }
 
-        public String DeliveryDecodeToString(){
-            StringBuilder sb =new StringBuilder();
-            Map<String, DeliveryMessage> dm = DeliveryElementGroupToStructMes(this.CtElement);
-            for(Map.Entry<String, DeliveryMessage> singleDM: dm.entrySet()){
-                sb.append(singleDM.getKey()).append(singleDM.getValue());
+        public String DeliveryDecodeToString() {
+            StringBuilder sb = new StringBuilder();
+            try {
+                Map<String, DeliveryMessage> dm = DeliveryElementGroupToStructMes(this.CtElement);
+                for (Map.Entry<String, DeliveryMessage> singleDM : dm.entrySet()) {
+                    try {
+                        System.out.println("log013:???");
+                        sb.append(singleDM.getKey()).append(singleDM.getValue());
+                        System.out.println("log013:---");
+                    } catch (Exception e) {
+                        System.out.println("log013:" + e.toString());
+                    }
+                }
+            } catch (Exception e) {
+                System.out.println("log013:" + e.toString());
             }
             return sb.toString();
         }
@@ -490,32 +507,44 @@ public class CodeConvert {
          * @return the map
          */
         public Map<String, DeliveryMessage> DeliveryElementGroupToStructMes(List<Element> BigNumGroup) {
+            for(Element element : BigNumGroup){
+                System.out.println("log013:"+element);
+            }
             Map<String, DeliveryMessage> structMes = new HashMap<>();
             DeliveryMessage senderMessage = new DeliveryMessage();
             DeliveryMessage receiverMessage = new DeliveryMessage();
-            List<String> element_strGroup = ElementGroupToElement_strGroup(BigNumGroup);
-            FirstLevelNumDealer(receiverMessage, element_strGroup.get(0));
-            SecondLevelNumDealer(receiverMessage, element_strGroup.get(1));
-            ThirdLevelNumDealer(senderMessage, element_strGroup.get(2));
+            try{
+                List<String> element_strGroup = ElementGroupToElement_strGroup(BigNumGroup);
+                FirstLevelNumDealer(receiverMessage, element_strGroup.get(0));
+                SecondLevelNumDealer(receiverMessage, element_strGroup.get(1));
+                ThirdLevelNumDealer(senderMessage, element_strGroup.get(2));
+            }catch (Exception e){
+                System.out.println("log013: 我猜是这个 "+e);
+            }
+;
+
             structMes.put("sender", senderMessage);
             structMes.put("receiver", receiverMessage);
             return structMes;
         }
 
         private void FirstLevelNumDealer(DeliveryMessage receiverMessage, String element_str) {
-            receiverMessage.setAheadAddress(element_str.substring(5, 10));
-            receiverMessage.setBehindAddress(BigNumToMes(element_str.substring(11)));
+            System.out.println("log013: first: "+element_str);
+            receiverMessage.setAheadAddress(element_str.substring(4, 10));
+            receiverMessage.setBehindAddress(BigNumToMes(element_str.substring(10)));
         }
 
         private void SecondLevelNumDealer(DeliveryMessage receiverMessage, String element_str) {
-            receiverMessage.setPhoneNumber(element_str.substring(5, 15));
-            receiverMessage.setPersonName(BigNumToMes(element_str.substring(16)));
+            System.out.println("log013: second: "+element_str);
+            receiverMessage.setPhoneNumber(element_str.substring(4, 15));
+            receiverMessage.setPersonName(BigNumToMes(element_str.substring(15)));
         }
 
         private void ThirdLevelNumDealer(DeliveryMessage senderMessage, String element_str) {
-            senderMessage.setAheadAddress(element_str.substring(5, 10));
-            senderMessage.setPhoneNumber(element_str.substring(15, 25));
-            senderMessage.setPersonName(BigNumToMes(element_str.substring(26)));
+            System.out.println("log013: third: "+element_str);
+            senderMessage.setAheadAddress(element_str.substring(4, 10));
+            senderMessage.setPhoneNumber(element_str.substring(14, 25));
+            senderMessage.setPersonName(BigNumToMes(element_str.substring(25)));
         }
 
     }

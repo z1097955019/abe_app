@@ -423,7 +423,7 @@ public class CP_ABE {
             accessTree.mainNode = levelNode;
 
             if (isValid(accessTree, userAttList, bp, D0, ctProp1, ctProp2, skProp)) {
-                System.out.println(levelNode.level + " level is ok");
+                System.out.println("log001:"+levelNode.level + " level is ok");
                 secretShare.put(levelNode.level, accessTree.mainNode.secretShare);
                 userLevel = Math.max(levelNode.level, userLevel);
             }
@@ -460,7 +460,7 @@ public class CP_ABE {
                 Element thisSecret = singleSecretShare.getValue();
 
                 Element egg_alphas = bp.pairing(C0, D).div(thisSecret);
-                System.out.println("login_egg_alphas" + egg_alphas);
+                System.out.println("log001: login_egg_alphas" + egg_alphas);
 
                 afterC.add(CWithLevel.get(thisLevel).div(egg_alphas));
             }

@@ -316,6 +316,7 @@ public class ABEFactory {
             }
             CodeConvert cct = new CodeConvert();
             CodeConvert.ABECtDecoder abeCtDecoder = cct.new ABECtDecoder(res);
+            System.out.println("log013:" + "类初始化完毕");
 
 //            String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
             String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
@@ -331,6 +332,7 @@ public class ABEFactory {
                 Toast.makeText(context, "解密失败", Toast.LENGTH_SHORT).show();
             }
 //            return resString;
+            System.out.println("log013:" + "解密完毕");
             return abeCtDecoder.DeliveryDecodeToString();
         }else {
             return "";
