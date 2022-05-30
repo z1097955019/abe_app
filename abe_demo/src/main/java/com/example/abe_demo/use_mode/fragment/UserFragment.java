@@ -378,7 +378,8 @@ public class UserFragment extends Fragment {
                 ABEFactory abeFactory = new ABEFactory(getContext());
                 message.put("sender", senderMessage);
                 message.put("receiver", receiverMessage);
-                Map<Integer, String> integerStringMap = CodeConvert.fromDataToBigNumGroup(message);
+                CodeConvert ccHelper = new CodeConvert(message);
+                Map<Integer, String> integerStringMap = ccHelper.abeCtEncoder.fromDataToBigNumGroup();
                 abeFactory.encrypt("pk.properties", integerStringMap);
                 initData(abeFactory);
             }

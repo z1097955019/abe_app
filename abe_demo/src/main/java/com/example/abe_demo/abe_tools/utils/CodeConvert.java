@@ -13,7 +13,31 @@ import it.unisa.dia.gas.jpbc.Element;
  * The type Code convert.
  */
 public class CodeConvert {
-    public CodeConvert() {
+    /**
+     * 解码实例.
+     */
+    public ABECtDecoder abeCtDecoder;
+    /**
+     * 编码类实例.
+     */
+    public ABECtEncoder abeCtEncoder;
+
+    /**
+     * 邮寄信息解码的构造函数.
+     *
+     * @param CtElement the ct element
+     */
+    public CodeConvert(List<Element> CtElement) {
+        abeCtDecoder = new ABECtDecoder(CtElement);
+    }
+
+    /**
+     * 邮寄信息编码的构造函数.
+     *
+     * @param dataBefore the data before
+     */
+    public CodeConvert(Map<String, DeliveryMessage> dataBefore) {
+        abeCtEncoder = new ABECtEncoder(dataBefore);
     }
 
     /**
@@ -23,7 +47,6 @@ public class CodeConvert {
      * @param needSeparator the need separator
      * @return the string
      */
-//
     public static String stringToAscii(String value, boolean needSeparator) {
         StringBuilder sbu = new StringBuilder();
         sbu.append("99999");
@@ -142,12 +165,8 @@ public class CodeConvert {
      * @param need9999  the need 9999
      * @return the list
      */
-//
     public static List<String> mesToBigNumGroup(String mes, int groupSize, boolean need9999) {
-        //
         List<String> mesGroup = group(mes, groupSize);
-
-        //
         List<String> mesValueGroup = new LinkedList<>();
         for (String singleMes : mesGroup) {
             System.out.println(singleMes.length());
@@ -160,8 +179,6 @@ public class CodeConvert {
                 }
             }
         }
-
-        //
         return mesValueGroup;
     }
 
@@ -237,88 +254,104 @@ public class CodeConvert {
         return BigNumGroupToMes(mesNumGroup);
     }
 
+
     /**
-     * Init data map.
-     *
-     * @param dataBefore the data before
-     * @return the map
+     * 处理邮寄信息编码的内部类.
      */
-// 把最初的文本进行前置处理
-    public static Map<String, DeliveryMessage> initData(Map<String, DeliveryMessage> dataBefore) {
-        for (Map.Entry<String, DeliveryMessage> entry : dataBefore.entrySet()) {
-            entry.getValue().setPhoneNumber("8686" + entry.getValue().getPhoneNumber());
-            entry.getValue().setAheadAddress("8866" + entry.getValue().getAheadAddress());
+    public class ABECtEncoder{
+
+        /**
+         * The Data before.
+         */
+        public Map<String, DeliveryMessage> dataBefore = new HashMap<>();
+
+        /**
+         * Instantiates a new Abe ct encoder.
+         *
+         * @param dataBefore the data before
+         */
+        public ABECtEncoder(Map<String, DeliveryMessage> dataBefore) {
+            this.dataBefore = dataBefore;
         }
-        return dataBefore;
-    }
 
-    /**
-     * Structural data to structural big num string map.
-     *
-     * @param dataBefore the data before
-     * @return the map
-     */
-// 把前置处理过的文本分别变为大数字字符串
-    public static Map<String, DeliveryMessage> structuralDataToStructuralBigNumString(Map<String, DeliveryMessage> dataBefore) {
-        for (Map.Entry<String, DeliveryMessage> entry : dataBefore.entrySet()) {
-            entry.getValue().setPersonName(mesToBigNum(entry.getValue().getPersonName()));
-            entry.getValue().setBehindAddress(mesToBigNum(entry.getValue().getBehindAddress()));
-        }
-        return dataBefore;
-    }
-
-    /**
-     * Structural big num string to big num group map.
-     *
-     * @param dataBefore the data before
-     * @return the map
-     */
-// 把转为大数字的结构化文本拼接成三个等级的大数字
-    public static Map<Integer, String> StructuralBigNumStringToBigNumGroup(Map<String, DeliveryMessage> dataBefore) {
-        Map<Integer, String> structuralClearText = new HashMap<>();
-
-        try {
-            StringBuilder senderSb = new StringBuilder();
-            DeliveryMessage sender = dataBefore.get("sender");
-            if (sender != null) {
-                senderSb.append(sender.getAheadAddress()).append(sender.getPhoneNumber())
-                        .append(sender.getPersonName()).append(sender.getBehindAddress());
+        /**
+         * 把最初的文本进行前置处理.
+         *
+         * @param dataBefore the data before
+         * @return the map
+         */
+        public  Map<String, DeliveryMessage> initData(Map<String, DeliveryMessage> dataBefore) {
+            for (Map.Entry<String, DeliveryMessage> entry : dataBefore.entrySet()) {
+                entry.getValue().setPhoneNumber("8686" + entry.getValue().getPhoneNumber());
+                entry.getValue().setAheadAddress("8866" + entry.getValue().getAheadAddress());
             }
-            structuralClearText.put(3, senderSb.toString());
-        } catch (Exception e) {
-            System.out.println("error log: " + e);
+            return dataBefore;
         }
 
-        try {
-            StringBuilder receiverSb1 = new StringBuilder();
-            StringBuilder receiverSb2 = new StringBuilder();
-            DeliveryMessage receiver = dataBefore.get("receiver");
-            if (receiver != null) {
-                receiverSb1.append(receiver.getAheadAddress()).append(receiver.getBehindAddress());
-                receiverSb2.append(receiver.getPhoneNumber()).append(receiver.getPersonName());
+        /**
+         * 把前置处理过的文本分别变为大数字字符串.
+         *
+         * @param dataBefore the data before
+         * @return the map
+         */
+        public  Map<String, DeliveryMessage> structuralDataToStructuralBigNumString(Map<String, DeliveryMessage> dataBefore) {
+            for (Map.Entry<String, DeliveryMessage> entry : dataBefore.entrySet()) {
+                entry.getValue().setPersonName(mesToBigNum(entry.getValue().getPersonName()));
+                entry.getValue().setBehindAddress(mesToBigNum(entry.getValue().getBehindAddress()));
             }
-            structuralClearText.put(2, receiverSb2.toString());
-            structuralClearText.put(1, receiverSb1.toString());
-        } catch (Exception e) {
-            System.out.println("error log: " + e);
+            return dataBefore;
         }
 
-        return structuralClearText;
+        /**
+         * 把转为大数字的结构化文本拼接成三个等级的大数字.
+         *
+         * @param dataBefore the data before
+         * @return the map
+         */
+        public  Map<Integer, String> StructuralBigNumStringToBigNumGroup(Map<String, DeliveryMessage> dataBefore) {
+            Map<Integer, String> structuralClearText = new HashMap<>();
+
+            try {
+                StringBuilder senderSb = new StringBuilder();
+                DeliveryMessage sender = dataBefore.get("sender");
+                if (sender != null) {
+                    senderSb.append(sender.getAheadAddress()).append(sender.getPhoneNumber())
+                            .append(sender.getPersonName()).append(sender.getBehindAddress());
+                }
+                structuralClearText.put(3, senderSb.toString());
+            } catch (Exception e) {
+                System.out.println("error log: " + e);
+            }
+
+            try {
+                StringBuilder receiverSb1 = new StringBuilder();
+                StringBuilder receiverSb2 = new StringBuilder();
+                DeliveryMessage receiver = dataBefore.get("receiver");
+                if (receiver != null) {
+                    receiverSb1.append(receiver.getAheadAddress()).append(receiver.getBehindAddress());
+                    receiverSb2.append(receiver.getPhoneNumber()).append(receiver.getPersonName());
+                }
+                structuralClearText.put(2, receiverSb2.toString());
+                structuralClearText.put(1, receiverSb1.toString());
+            } catch (Exception e) {
+                System.out.println("error log: " + e);
+            }
+
+            return structuralClearText;
+        }
+
+
+        /**
+         * From data to big num group map.
+         *
+         * @return the map
+         */
+        public  Map<Integer, String> fromDataToBigNumGroup() {
+            return StructuralBigNumStringToBigNumGroup(structuralDataToStructuralBigNumString(initData(this.dataBefore)));
+        }
     }
 
-
     /**
-     * From data to big num group map.
-     *
-     * @param dataBefore the data before
-     * @return the map
-     */
-    public static Map<Integer, String> fromDataToBigNumGroup(Map<String, DeliveryMessage> dataBefore) {
-        return StructuralBigNumStringToBigNumGroup(structuralDataToStructuralBigNumString(initData(dataBefore)));
-    }
-
-    /**
-     * The type Abe ct decoder.
      * 解码工具类
      */
     public class ABECtDecoder {
@@ -327,8 +360,7 @@ public class CodeConvert {
         private final List<Element> CtElement;
 
         /**
-         * Instantiates a new Abe ct decoder.
-         * 构造函数赋值
+         * 构造函数赋值.
          *
          * @param CtElement the ct element
          */
@@ -338,8 +370,7 @@ public class CodeConvert {
 
 
         /**
-         * Decode to string string.
-         * 生成单个字符串的解码函数
+         * 生成单个字符串的解码函数.
          *
          * @return the string
          */
@@ -348,8 +379,7 @@ public class CodeConvert {
         }
 
         /**
-         * Decode to structural string list.
-         * 生成字符串列表的解码函数
+         * 生成字符串列表的解码函数.
          *
          * @return the list
          */
@@ -358,8 +388,7 @@ public class CodeConvert {
         }
 
         /**
-         * Ascii to string string.
-         * 把含有“，”的字符串通过ASCII码编码为正常的符号
+         * 把含有“，”的字符串通过ASCII码编码为正常的符号.
          *
          * @param value the value
          * @return the string
@@ -374,8 +403,7 @@ public class CodeConvert {
         }
 
         /**
-         * Add separator string.
-         * 为单个jpbc元素添加分隔符
+         * 为单个jpbc元素添加分隔符.
          *
          * @param num the num
          * @return the string
@@ -390,8 +418,7 @@ public class CodeConvert {
         }
 
         /**
-         * Add separator string.
-         * 为一组jpbc元素添加分隔符
+         * 为一组jpbc元素添加分隔符.
          *
          * @param numGroup the num group
          * @return the string
@@ -408,8 +435,7 @@ public class CodeConvert {
         }
 
         /**
-         * Big num group to mes string.
-         * 将一组元素转为一个合并的解码后的明文
+         * 将一组元素转为一个合并的解码后的明文.
          *
          * @param numGroup the num group
          * @return the string
@@ -419,6 +445,12 @@ public class CodeConvert {
             return asciiToString(mesNum);
         }
 
+        /**
+         * Big num to mes string.
+         *
+         * @param num_str the num str
+         * @return the string
+         */
         public String BigNumToMes(String num_str) {
             String mesNum = addSeparator(num_str);
             return asciiToString(mesNum);
@@ -433,8 +465,7 @@ public class CodeConvert {
         }
 
         /**
-         * Big num group to structural mes list.
-         * 将一组元素转化成一个解码后的明文列表
+         * 将一组元素转化成一个解码后的明文列表.
          *
          * @param numGroup the num group
          * @return the list
@@ -448,8 +479,7 @@ public class CodeConvert {
         }
 
         /**
-         * Element to string string.
-         * 把元素转化为对应的大数字字符串
+         * 把元素转化为对应的大数字字符串.
          *
          * @param num the num
          * @return the string
@@ -466,8 +496,7 @@ public class CodeConvert {
         }
 
         /**
-         * Element group to element str group list.
-         * 把元素列表转化为对应的大数字字符串列表
+         * 把元素列表转化为对应的大数字字符串列表.
          *
          * @param numGroup the num group
          * @return the list
@@ -480,6 +509,11 @@ public class CodeConvert {
             return element_strGroup;
         }
 
+        /**
+         * Delivery decode to string string.
+         *
+         * @return the string
+         */
         public String DeliveryDecodeToString() {
             StringBuilder sb = new StringBuilder();
             try {
@@ -500,8 +534,7 @@ public class CodeConvert {
         }
 
         /**
-         * Delivery element group to struct mes map.
-         * 从元素列表解析出所有快递数据
+         * 从元素列表解析出所有快递数据.
          *
          * @param BigNumGroup the big num group
          * @return the map
@@ -521,7 +554,6 @@ public class CodeConvert {
             }catch (Exception e){
                 System.out.println("log013: 我猜是这个 "+e);
             }
-;
 
             structMes.put("sender", senderMessage);
             structMes.put("receiver", receiverMessage);
@@ -544,11 +576,18 @@ public class CodeConvert {
             System.out.println("log013: third: "+element_str);
             senderMessage.setAheadAddress(element_str.substring(4, 10));
             senderMessage.setPhoneNumber(element_str.substring(14, 25));
-            senderMessage.setPersonName(BigNumToMes(element_str.substring(25)));
+            String[] addressAndNameNum = element_str.substring(25).split("99999");
+            List<String> formalAddressAndNameNum = new LinkedList<>();
+            for (String num:addressAndNameNum){
+                if (!num.equals("")){
+                    formalAddressAndNameNum.add(num);
+                }
+            }
+            senderMessage.setPersonName(BigNumToMes("99999"+formalAddressAndNameNum.get(0)));
+            senderMessage.setBehindAddress(BigNumToMes("99999"+formalAddressAndNameNum.get(1)));
         }
 
     }
-
 
     /**
      * The entry point of application.

@@ -314,8 +314,7 @@ public class ABEFactory {
             for (Element bigNum : res) {
                 messageBigNumStringGroup.add(bigNum.toString().substring(1, bigNum.toString().length() - 1).split(",")[0].substring(2));
             }
-            CodeConvert cct = new CodeConvert();
-            CodeConvert.ABECtDecoder abeCtDecoder = cct.new ABECtDecoder(res);
+            CodeConvert ccHelper = new CodeConvert(res);
             System.out.println("log013:" + "类初始化完毕");
 
 //            String resString = CodeConvert.BigNumGroupToMes(messageBigNumStringGroup);
@@ -333,7 +332,7 @@ public class ABEFactory {
             }
 //            return resString;
             System.out.println("log013:" + "解密完毕");
-            return abeCtDecoder.DeliveryDecodeToString();
+            return ccHelper.abeCtDecoder.DeliveryDecodeToString();
         }else {
             return "";
         }
